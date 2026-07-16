@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdvertisementController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\Admin\PartnerController;
@@ -25,4 +26,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::get('withdraws/{withdrawRequest}', [WithdrawController::class, 'show'])->name('withdraws.show');
     Route::patch('withdraws/{withdrawRequest}/approve', [WithdrawController::class, 'approve'])->name('withdraws.approve');
     Route::patch('withdraws/{withdrawRequest}/reject', [WithdrawController::class, 'reject'])->name('withdraws.reject');
+
+    // Advertisement Management
+    Route::resource('advertisements', AdvertisementController::class);
 });

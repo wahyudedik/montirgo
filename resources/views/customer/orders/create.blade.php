@@ -14,7 +14,7 @@
     <div class="py-8">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
 
-            <form method="POST" action="{{ route('customer.orders.store') }}" id="orderForm" x-data="orderForm()" x-init="init()">
+            <form method="POST" action="{{ route('customer.orders.store') }}" id="orderForm" x-data="orderForm()" x-init="init()" enctype="multipart/form-data">
                 @csrf
 
                 {{-- Step 1: Pilih Kendaraan --}}
@@ -115,10 +115,47 @@
                     </div>
                 </div>
 
-                {{-- Step 4: Lokasi --}}
+                {{-- Step 4: Foto/Video (Opsional) --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <div class="flex items-center gap-3 mb-5">
                         <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold">4</div>
+                        <h3 class="text-base font-bold text-dark">Foto/Video Kendala <span class="text-xs text-gray-400 font-normal">(Opsional)</span></h3>
+                    </div>
+
+                    <div>
+                        <p class="text-sm text-gray-500 mb-3">Unggah foto atau video kendala kendaraan untuk membantu mekanik memahami masalah.</p>
+                        <div class="border-2 border-dashed border-gray-200 rounded-xl p-6 text-center hover:border-primary/50 transition-colors">
+                            <input type="file" name="photos[]" id="photo-input" multiple accept="image/*,video/*" class="hidden" @change="handlePhotos($event)">
+                            <label for="photo-input" class="cursor-pointer">
+                                <svg class="w-10 h-10 text-gray-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                                <p class="text-sm text-gray-500">Klik untuk pilih foto/video</p>
+                                <p class="text-xs text-gray-400 mt-1">JPG, PNG, WEBP, MP4 (maks. 5MB per file)</p>
+                            </label>
+                        </div>
+                        {{-- Preview --}}
+                        <div class="flex flex-wrap gap-2 mt-3" x-show="photoPreviewUrls.length > 0">
+                            <template x-for="(url, index) in photoPreviewUrls" :key="index">
+                                <div class="relative w-20 h-20 rounded-lg overflow-hidden border border-gray-200">
+                                    <img :src="url" class="w-full h-full object-cover" x-show="!url.includes('video')">
+                                    <div class="w-full h-full bg-gray-100 flex items-center justify-center" x-show="url.includes('video')">
+                                        <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    </div>
+                                    <button type="button" @click="removePhoto(index)" class="absolute top-0.5 right-0.5 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center text-xs">
+                                        ×
+                                    </button>
+                                </div>
+                            </template>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-2" x-show="photoPreviewUrls.length > 0">
+                            <span x-text="photoPreviewUrls.length"></span> foto/video dipilih
+                        </p>
+                    </div>
+                </div>
+
+                {{-- Step 5: Lokasi --}}
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
+                    <div class="flex items-center gap-3 mb-5">
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold">5</div>
                         <h3 class="text-base font-bold text-dark">Lokasi Anda</h3>
                     </div>
 
@@ -157,10 +194,10 @@
                     @enderror
                 </div>
 
-                {{-- Step 5: Pembayaran --}}
+                {{-- Step 6: Pembayaran --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
                     <div class="flex items-center gap-3 mb-5">
-                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold">5</div>
+                        <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold">6</div>
                         <h3 class="text-base font-bold text-dark">Metode Pembayaran</h3>
                     </div>
 
@@ -241,11 +278,31 @@
                 lng: {{ old('location_lng', 'null') }},
                 locationDetected: {{ old('location_lat') ? 'true' : 'false' }},
                 selectedService: '{{ old('service_category', '') }}{{ old('service_category') && old('service_type') ? ' - ' : '' }}{{ old('service_type', '') }}',
+                photoPreviewUrls: [],
 
                 init() {
                     if (!this.locationDetected) {
                         this.detectLocation();
                     }
+                },
+
+                handlePhotos(event) {
+                    const files = Array.from(event.target.files);
+                    files.forEach(file => {
+                        if (file.size > 5 * 1024 * 1024) {
+                            alert('File ' + file.name + ' terlalu besar (maks. 5MB)');
+                            return;
+                        }
+                        const url = URL.createObjectURL(file);
+                        this.photoPreviewUrls.push(url);
+                    });
+                },
+
+                removePhoto(index) {
+                    this.photoPreviewUrls.splice(index, 1);
+                    // Reset file input
+                    const input = document.getElementById('photo-input');
+                    input.value = '';
                 },
 
                 detectLocation() {

@@ -30,6 +30,8 @@
 | **FASE 5** | **✅ Selesai** |
 | **FASE 6** | **✅ Selesai** |
 | **FASE 7** | **✅ Selesai** |
+| **FASE 8** | **✅ Selesai** |
+| **FASE 9** | **✅ Selesai** |
 
 ---
 
@@ -526,6 +528,112 @@ graph TD
 
 ---
 
+### FASE 8 — Enhancements & Monetisasi (Iklan, Calls, Nav, Upload)
+
+```mermaid
+graph TD
+    A[8.1 Automotive Advertising<br/>Iklan Otomotif] --> B[8.2 In-App Phone Calls<br/>VoIP Integration]
+    B --> C[8.3 Deep Link Navigation<br/>Google Maps / Waze]
+    C --> D[8.4 Upload Foto/Video<br/>during Order]
+    D --> E[8.5 Partner Service Cost<br/>Input UI]
+    E --> F[8.6 Payment Gateway<br/>Midtrans / Xendit]
+    F --> G[✅ Enhancements Selesai]
+```
+
+**Detail Tasks:**
+
+| ID | Task | Output | Status |
+|:---|:---|:---|:---|
+| 8.1 | Automotive Advertising System | Tabel `advertisements`, Model, Admin CRUD, tampilan iklan di app | ✅ |
+| 8.2 | In-App Phone Calls (VoIP) | CallLog model + tel: link stub buttons di order detail | ✅ |
+| 8.3 | Deep Link Navigation | Deep link ke Google Maps/Waze dari order detail (partner & customer) | ✅ |
+| 8.4 | Upload Foto/Video saat Order | UI upload foto/video di order form customer dengan preview | ✅ |
+| 8.5 | Partner Service Cost Input | UI mekanik input rincian biaya servis & sparepart saat in_progress | ✅ |
+| 8.6 | Payment Gateway Integration | Webhook endpoint + Payment Status API untuk Midtrans/Xendit | ✅ |
+
+**Rincian FASE 8:**
+
+#### 8.1 Automotive Advertising System (Iklan Otomotif)
+- **Tabel:** `advertisements` (id, partner_id, title, image_path, target_url, position, start_date, end_date, is_active, impressions, clicks)
+- **Model:** `App\Models\Advertisement`
+- **Admin CRUD:** Kelola iklan, upload banner, atur jadwal & posisi
+- **Tampilan:** Banner iklan di halaman customer/partner (sidebar, feed, atau popup)
+- **Analytics:** Impression tracking, click-through rate (CTR)
+
+#### 8.2 In-App Phone Calls (VoIP)
+- **Integrasi:** WebRTC atau third-party VoIP (Twilio, Vonage) untuk panggilan tanpa membuka nomor HP
+- **Fitur:** Panggilan voice dari chat screen, history panggilan, reject/accept call UI
+- **Privasi:** Nomor telepon tidak terekspos, menggunakan virtual number
+- **Logging:** Catatan durasi & status panggilan di `call_logs` table
+
+#### 8.3 Deep Link Navigation (Google Maps / Waze)
+- **Partner App:** Tombol "Navigasi" di order detail → buka Google Maps/Waze dengan koordinat destination
+- **Customer App:** Tombol "Lihat di Maps" → buka Google Maps/Waze dengan koordinat partner
+- **Implementasi:** URL scheme `google.navigation://` dan `waze://` + fallback ke web URL
+
+#### 8.4 Upload Foto/Video saat Order
+- **Customer Order Form:** Tambahkan field upload foto/keluhan (maks 5 foto, max 1 video 30s)
+- **Partner During Service:** Upload foto "before" saat mulai servis, "after" saat selesai
+- **Storage:** Simpan ke disk `order-photos` (local/S3), max 5MB per foto, 20MB per video
+- **Tampilan:** Galeri foto di order detail untuk customer, partner, dan admin
+
+#### 8.5 Partner Service Cost Input UI
+- **Saat Status `in_progress`:** Partner mendapat form untuk input rincian biaya:
+  - Nama item servis + harga
+  - Nama sparepart + harga + jumlah
+  - Total otomatis terhitung
+- **Flow:** Partner submit → Customer melihat rincian → Setuju → Bayar
+- **Validasi:** Total servis fee harus > 0, admin commission otomatis dihitung
+
+#### 8.6 Payment Gateway Integration (Midtrans/Xendit)
+- **Integrasi Midtrans/Xendit:** QRIS, Virtual Account, Bank Transfer
+- **Flow:** Customer pilih metode bayar → generate payment link/QR → verifikasi otomatis via webhook
+- **Fallback:** Tetap dukung Cash dan Wallet sebagai opsi pembayaran
+- **Webhook:** Endpoint untuk menerima notifikasi pembayaran berhasil/gagal
+
+---
+
+### FASE 9 — Final Enhancements (Foto Partner, Komisi, Analytics)
+
+```mermaid
+graph TD
+    A[9.1 Partner Upload<br/>Foto Before/After] --> B[9.2 Komisi Non-Tunai<br/>Configurable 5-10%]
+    B --> C[9.3 Iklan Impression<br/>& Click Tracking]
+    C --> D[✅ Final Enhancements Selesai]
+```
+
+**Detail Tasks:**
+
+| ID | Task | Output | Status |
+|:---|:---|:---|:---|
+| 9.1 | Partner Upload Foto Before/After | Form upload foto saat servis (type: before/after) di partner order flow | ✅ |
+| 9.2 | Komisi Non-Tunai Configurable | Setting komisi tambahan 5-10% untuk pembayaran nontunai | ✅ |
+| 9.3 | Iklan Impression & Click Tracking | Endpoint increment impressions/clicks + redirect ke target_url | ✅ |
+
+**Rincian FASE 9:**
+
+#### 9.1 Partner Upload Foto Before/After Saat Servis
+- **Kondisi:** Saat order status `in_progress`, partner bisa upload foto:
+  - **Before:** Kondisi kendaraan saat pertama kali diperiksa (type: `before`)
+  - **After:** Kondisi kendaraan setelah perbaikan selesai (type: `after`)
+- **UI:** Form/step tambahan di partner order show, upload button dengan camera/gallery picker
+- **Storage:** Simpan ke disk `order-photos` dengan `user_id` partner, max 5MB per foto
+- **Tampilan:** Galeri foto before/after di order detail (customer, partner, admin)
+
+#### 9.2 Komisi Non-Tunai Configurable (5-10%)
+- **Kondisi:** Platform dapat mengatur persentase komisi tambahan untuk pembayaran nontunai
+- **Config:** `config/services.php` → `montirgo.additional_commission_rate` (default: 0.10)
+- **Logic:** Jika `payment_method` ≠ `cash` → tambah komisi dari service_fee
+- **Admin:** Opsi ubah rate di admin settings (opsional, bisa hardcode dulu)
+
+#### 9.3 Iklan Impression & Click Tracking
+- **Endpoint 1:** `GET /api/v1/advertisements/{id}/impression` → increment `impressions` counter
+- **Endpoint 2:** `GET /api/v1/advertisements/{id}/click` → increment `clicks` + redirect ke `target_url`
+- **Display:** Hitungan impressions & clicks di admin advertisements index
+- **Analytics:** Click-through rate (CTR) = clicks / impressions × 100%
+
+---
+
 ## 📦 Tech Stack Final
 
 ```mermaid
@@ -600,11 +708,17 @@ graph LR
     subgraph "Minggu 6-8"
         P6[Fase 6: Mobile API]
     end
-    subgraph "Minggu 8+"
+    subgraph "Minggu 8-9"
         P7[Fase 7: Advanced]
     end
+    subgraph "Minggu 10+"
+        P8[Fase 8: Enhancements]
+    end
+    subgraph "Minggu 11+"
+        P9[Fase 9: Final Polish]
+    end
 
-    P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7
+    P1 --> P2 --> P3 --> P4 --> P5 --> P6 --> P7 --> P8 --> P9
 ```
 
 > **Mulai dari Fase 1:** Install Breeze → Multi-Role → Migrations → Models → Custom Admin → Seeders
@@ -620,3 +734,5 @@ graph LR
 | **M3 — Realtime** | 4-5 | Tracking + Chat + SOS |
 | **M4 — Mobile Ready** | 6 | API lengkap untuk React Native |
 | **M5 — Full Feature** | 7 | Marketplace + Premium + B2B |
+| **M6 — Monetization** | 8 | Ads + Calls + Nav + Payment Gateway |
+| **M7 — Polish** | 9 | Foto Partner + Komisi Configurable + Ad Analytics |

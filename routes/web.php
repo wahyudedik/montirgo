@@ -8,6 +8,7 @@ use App\Http\Controllers\Customer\SosController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Partner\OrderController as PartnerOrderController;
 use App\Http\Controllers\Partner\ReviewController as PartnerReviewController;
+use App\Http\Controllers\Partner\ServiceCostController;
 use App\Http\Controllers\Partner\SparepartController;
 use App\Http\Controllers\Partner\SubscriptionController;
 use App\Http\Controllers\Partner\WalletController as PartnerWalletController;
@@ -87,6 +88,14 @@ Route::middleware(['auth', 'verified', 'role:partner'])->prefix('partner')->name
 
     // Spareparts
     Route::resource('spareparts', SparepartController::class)->except(['show']);
+
+    // Service Cost Input
+    Route::get('/service-cost', [ServiceCostController::class, 'index'])->name('service-cost.index');
+    Route::get('/orders/{order}/service-cost', [ServiceCostController::class, 'create'])->name('service-cost.create');
+    Route::post('/orders/{order}/service-cost', [ServiceCostController::class, 'store'])->name('service-cost.store');
+
+    // Partner Upload Foto Before/After
+    Route::post('/orders/{order}/photos', [PartnerOrderController::class, 'uploadPhoto'])->name('orders.upload-photo');
 });
 
 require __DIR__.'/auth.php';

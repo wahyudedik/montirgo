@@ -42,6 +42,9 @@
                         <x-nav-link :href="route('partner.spareparts.index')" :active="request()->routeIs('partner.spareparts.*')">
                             🔧 {{ __('Sparepart') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('partner.service-cost.index')" :active="request()->routeIs('partner.service-cost.*')">
+                            💰 {{ __('Biaya Servis') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('partner.subscription.index')" :active="request()->routeIs('partner.subscription.*')">
                             💎 {{ __('Subscription') }}
                         </x-nav-link>
@@ -56,6 +59,9 @@
                         </x-nav-link>
                         <x-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                             {{ __('Orders') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('admin.advertisements.index')" :active="request()->routeIs('admin.advertisements.*')">
+                            {{ __('Iklan') }}
                         </x-nav-link>
                     @endif
                 </div>
@@ -147,6 +153,9 @@
                 <x-responsive-nav-link :href="route('partner.spareparts.index')" :active="request()->routeIs('partner.spareparts.*')">
                     🔧 {{ __('Sparepart') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('partner.service-cost.index')" :active="request()->routeIs('partner.service-cost.*')">
+                    💰 {{ __('Biaya Servis') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('partner.subscription.index')" :active="request()->routeIs('partner.subscription.*')">
                     💎 {{ __('Subscription') }}
                 </x-responsive-nav-link>
@@ -161,6 +170,9 @@
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('admin.orders.index')" :active="request()->routeIs('admin.orders.*')">
                     {{ __('Orders') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('admin.advertisements.index')" :active="request()->routeIs('admin.advertisements.*')">
+                    {{ __('Iklan') }}
                 </x-responsive-nav-link>
             @endif
         </div>

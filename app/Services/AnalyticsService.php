@@ -6,7 +6,6 @@ namespace App\Services;
 
 use App\Models\Order;
 use App\Models\Partner;
-use App\Models\Payment;
 use App\Models\User;
 use App\Models\WalletTransaction;
 use Illuminate\Support\Carbon;
@@ -37,11 +36,11 @@ class AnalyticsService
             'orders_this_month' => Order::where('created_at', '>=', $startOfMonth)->count(),
             'active_orders' => Order::whereIn('status', ['pending', 'dispatching', 'accepted', 'on_the_way', 'arrived', 'in_progress'])->count(),
 
-            // Revenue
-            'revenue_this_month' => (float) Payment::where('status', 'paid')
+            // Revenue (platform_commission lives on orders, not payments)
+            'revenue_this_month' => (float) Order::where('payment_status', 'paid')
                 ->where('created_at', '>=', $startOfMonth)
                 ->sum('platform_commission'),
-            'revenue_total' => (float) Payment::where('status', 'paid')
+            'revenue_total' => (float) Order::where('payment_status', 'paid')
                 ->sum('platform_commission'),
 
             // Completion rate
@@ -60,7 +59,7 @@ class AnalyticsService
             $date = Carbon::now()->subMonths($i);
             $months->push([
                 'month' => $date->format('M Y'),
-                'revenue' => (float) Payment::where('status', 'paid')
+                'revenue' => (float) Order::where('payment_status', 'paid')
                     ->whereYear('created_at', $date->year)
                     ->whereMonth('created_at', $date->month)
                     ->sum('platform_commission'),

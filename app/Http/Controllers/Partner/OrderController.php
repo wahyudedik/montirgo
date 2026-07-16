@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Partner;
 use App\Events\OrderStatusChanged;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderPhoto;
 use App\Services\DispatchService;
 use App\Services\NotificationService;
 use App\Services\PaymentService;
@@ -47,7 +48,7 @@ class OrderController extends Controller
     {
         $this->authorizeOrder($order);
 
-        $order->load(['user', 'vehicle', 'payment', 'review']);
+        $order->load(['user', 'vehicle', 'payment', 'review', 'photos']);
 
         return view('partner.orders.show', compact('order'));
     }
@@ -169,6 +170,33 @@ class OrderController extends Controller
 
         return redirect()->route('partner.orders.show', $order)
             ->with('success', "Status order #{$order->code} diperbarui: {$statusLabel}");
+    }
+
+    /**
+     * Upload foto before/after saat servis.
+     */
+    public function uploadPhoto(Request $request, Order $order): RedirectResponse
+    {
+        $this->authorizeOrder($order);
+
+        $validated = $request->validate([
+            'photo' => 'required|file|image|mimes:jpg,jpeg,png,webp|max:5120',
+            'type' => 'required|in:before,after',
+        ]);
+
+        $user = Auth::user();
+
+        $path = $request->file('photo')->store('order-photos', 'public');
+
+        OrderPhoto::create([
+            'order_id' => $order->id,
+            'photo_url' => $path,
+            'type' => $validated['type'],
+            'uploaded_by' => $user->id,
+            'caption' => $validated['type'] === 'before' ? 'Kondisi sebelum servis' : 'Kondisi setelah servis',
+        ]);
+
+        return back()->with('success', 'Foto '.$validated['type'].' berhasil diupload.');
     }
 
     /**

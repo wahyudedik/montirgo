@@ -54,7 +54,7 @@
                 {{-- Revenue Chart --}}
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
                     <h3 class="text-lg font-semibold text-dark mb-4">📈 Revenue (12 Bulan)</h3>
-                    <div x-data="revenueChart()" x-init="init()" class="space-y-2">
+                    <div class="space-y-2">
                         @foreach($revenueChart as $i => $month)
                             @php
                                 $maxRevenue = collect($revenueChart)->max('revenue') ?: 1;

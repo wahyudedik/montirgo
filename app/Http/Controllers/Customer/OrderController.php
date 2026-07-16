@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
+use App\Models\OrderPhoto;
 use App\Models\Vehicle;
 use App\Services\DispatchService;
 use Illuminate\Http\RedirectResponse;
@@ -95,6 +96,8 @@ class OrderController extends Controller
             'location_lng' => 'required|numeric|between:-180,180',
             'location_address' => 'nullable|string|max:255',
             'payment_method' => 'required|in:cash,wallet,qris,card',
+            'photos' => 'nullable|array|max:5',
+            'photos.*' => 'file|mimes:jpg,jpeg,png,webp,mp4|max:5120',
         ], [
             'vehicle_id.exists' => 'Kendaraan yang dipilih tidak valid.',
             'service_category.required' => 'Kategori layanan wajib dipilih.',
@@ -104,6 +107,9 @@ class OrderController extends Controller
             'location_lng.required' => 'Lokasi wajib diaktifkan.',
             'location_lng.numeric' => 'Format longitude tidak valid.',
             'payment_method.required' => 'Metode pembayaran wajib dipilih.',
+            'photos.max' => 'Maksimal 5 foto/video.',
+            'photos.*.max' => 'Ukuran file maksimal 5MB.',
+            'photos.*.mimes' => 'Format file tidak didukung.',
         ]);
 
         $user = Auth::user();
@@ -122,6 +128,22 @@ class OrderController extends Controller
             'payment_method' => $validated['payment_method'],
             'status' => 'pending',
         ]);
+
+        // Handle photo/video uploads
+        if ($request->hasFile('photos')) {
+            foreach ($request->file('photos') as $file) {
+                $path = $file->store('order-photos', 'public');
+                $type = str_starts_with($file->getMimeType(), 'video/') ? 'video' : 'photo';
+
+                OrderPhoto::create([
+                    'order_id' => $order->id,
+                    'user_id' => $user->id,
+                    'photo_url' => $path,
+                    'type' => $type,
+                    'caption' => null,
+                ]);
+            }
+        }
 
         // Mulai proses dispatch
         app(DispatchService::class)->startDispatch($order);

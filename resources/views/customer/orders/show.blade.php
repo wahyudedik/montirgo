@@ -128,6 +128,17 @@
                             <span class="text-gray-500">Estimasi tiba: <strong class="text-primary">{{ $eta['formatted'] }}</strong></span>
                         </div>
                     @endif
+                    {{-- Deep Link Navigation --}}
+                    <div class="flex gap-2 mt-3">
+                        <a href="https://www.google.com/maps/dir/?api=1&destination={{ $order->location_lat }},{{ $order->location_lng }}" target="_blank" class="flex-1 inline-flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+                            Google Maps
+                        </a>
+                        <a href="https://waze.com/ul?ll={{ $order->location_lat }},{{ $order->location_lng }}&navigate=yes" target="_blank" class="flex-1 inline-flex items-center justify-center gap-2 bg-purple-50 hover:bg-purple-100 text-purple-600 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                            Waze
+                        </a>
+                    </div>
                 </div>
             @endif
 
@@ -147,17 +158,24 @@
                             <p class="font-bold text-dark">{{ $order->partner->workshop_name }}</p>
                             <p class="text-sm text-gray-500">{{ $order->partner->workshop_address ?? 'Alamat belum diatur' }}</p>
                             <div class="flex items-center gap-2 mt-1">
-                                <div class="flex items-center gap-0.5">
-                                    <svg class="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
-                                    <span class="text-xs font-medium text-gray-600">{{ number_format($order->partner->rating_avg, 1) }}</span>
+                                        <div class="flex items-center gap-0.5">
+                                            <svg class="w-3.5 h-3.5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+                                            <span class="text-xs font-medium text-gray-600">{{ number_format($order->partner->rating_avg, 1) }}</span>
+                                        </div>
+                                        <span class="text-gray-300">·</span>
+                                        <span class="text-xs text-gray-400">{{ $order->partner->total_orders }} order</span>
+                                    </div>
                                 </div>
-                                <span class="text-gray-300">·</span>
-                                <span class="text-xs text-gray-400">{{ $order->partner->total_orders }} order</span>
+                                {{-- In-App Phone Call --}}
+                                @if($order->partner->user->phone)
+                                    <a href="tel:{{ $order->partner->user->phone }}" class="mt-3 flex items-center gap-2 bg-green-50 hover:bg-green-100 text-green-600 text-sm font-medium px-4 py-2.5 rounded-xl transition-colors">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                                        Hubungi Mekanik
+                                    </a>
+                                @endif
                             </div>
                         </div>
-                    </div>
-                </div>
-            @endif
+                    @endif
 
             {{-- Detail Order --}}
             <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">

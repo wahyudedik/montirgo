@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Admin\AdvertisementController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PartnerController;
+use App\Http\Controllers\Api\PaymentGatewayController;
 use App\Http\Controllers\Api\WalletController;
 use App\Models\NotificationLog;
 use App\Services\NotificationService;
@@ -98,3 +100,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
 
 // Insurance Webhook (authenticated via API key)
 Route::post('/v1/insurance/webhook/claim-update', [InsuranceController::class, 'webhookUpdateClaim']);
+
+// Advertisement Tracking (public)
+Route::post('/v1/ads/{advertisement}/impression', [AdvertisementController::class, 'trackImpression']);
+Route::post('/v1/ads/{advertisement}/click', [AdvertisementController::class, 'trackClick']);
+
+// Payment Gateway Webhook (public endpoint for payment provider callbacks)
+Route::post('/v1/payment/webhook', [PaymentGatewayController::class, 'webhookUpdateClaim']);
+Route::get('/v1/payment/status/{orderCode}', [PaymentGatewayController::class, 'paymentStatus']);

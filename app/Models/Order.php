@@ -137,9 +137,19 @@ class Order extends Model
         return $this->hasMany(OrderPhoto::class);
     }
 
+    public function serviceCostItems(): HasMany
+    {
+        return $this->hasMany(ServiceCostItem::class);
+    }
+
     public function review(): HasOne
     {
         return $this->hasOne(Review::class);
+    }
+
+    public function callLogs(): HasMany
+    {
+        return $this->hasMany(CallLog::class);
     }
 
     public function isPending(): bool

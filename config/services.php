@@ -41,4 +41,17 @@ return [
         'client_email' => env('FCM_CLIENT_EMAIL'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | MontirGo Platform Settings
+    |--------------------------------------------------------------------------
+    |
+    | Platform commission rate for non-cash payments (5-10%).
+    |
+    */
+
+    'montirgo' => [
+        'additional_commission_rate' => (float) env('MONTIRGO_ADDITIONAL_COMMISSION_RATE', 0.10),
+    ],
+
 ];
