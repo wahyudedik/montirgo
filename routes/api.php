@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\ChatController;
+use App\Http\Controllers\Api\InsuranceController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\PartnerController;
 use App\Http\Controllers\Api\WalletController;
@@ -16,6 +17,9 @@ Route::post('/v1/auth/login', [AuthController::class, 'login']);
 
 // Partner nearby (public)
 Route::get('/v1/partners/nearby', [PartnerController::class, 'nearby']);
+
+// Insurance partners (public)
+Route::get('/v1/insurance/partners', [InsuranceController::class, 'partners']);
 
 // ─── Protected Routes (Sanctum) ────────────────────────
 Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
@@ -86,4 +90,11 @@ Route::middleware('auth:sanctum')->prefix('v1')->group(function () {
     Route::get('/wallet/transactions', [WalletController::class, 'transactions']);
     Route::post('/wallet/withdraw', [WalletController::class, 'withdraw']);
     Route::get('/wallet/withdraw/history', [WalletController::class, 'withdrawHistory']);
+
+    // Insurance Claims
+    Route::post('/orders/{order}/insurance-claim', [InsuranceController::class, 'createClaim']);
+    Route::get('/insurance-claims/{claim}/status', [InsuranceController::class, 'claimStatus']);
 });
+
+// Insurance Webhook (authenticated via API key)
+Route::post('/v1/insurance/webhook/claim-update', [InsuranceController::class, 'webhookUpdateClaim']);

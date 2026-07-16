@@ -1,0 +1,82 @@
+<x-app-layout>
+    <x-slot name="header">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('partner.spareparts.index') }}" class="text-gray-400 hover:text-dark transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+            </a>
+            <h2 class="text-xl font-bold text-dark">🔧 Edit Sparepart</h2>
+        </div>
+    </x-slot>
+
+    <div class="py-8">
+        <div class="max-w-lg mx-auto sm:px-6 lg:px-8">
+            <form method="POST" action="{{ route('partner.spareparts.update', $sparepart) }}" enctype="multipart/form-data" class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-5">
+                @csrf
+                @method('PUT')
+
+                <div>
+                    <label for="name" class="block text-sm font-semibold text-dark mb-1.5">Nama Item *</label>
+                    <input type="text" id="name" name="name" value="{{ old('name', $sparepart->name) }}" required
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary">
+                    @error('name') <p class="text-xs text-red-500 mt-1">{{ $message }}</p> @enderror
+                </div>
+
+                <div>
+                    <label for="description" class="block text-sm font-semibold text-dark mb-1.5">Deskripsi</label>
+                    <textarea id="description" name="description" rows="2"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary resize-none">{{ old('description', $sparepart->description) }}</textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="category" class="block text-sm font-semibold text-dark mb-1.5">Kategori *</label>
+                        <select id="category" name="category" required class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary">
+                            @foreach(['Rem', 'Mesin', 'Kelistrikan', 'Oli & Pelumas', 'Ban & Velg', 'Aksesoris', 'Lainnya'] as $cat)
+                                <option value="{{ $cat }}" {{ old('category', $sparepart->category) === $cat ? 'selected' : '' }}>{{ $cat }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div>
+                        <label for="stock" class="block text-sm font-semibold text-dark mb-1.5">Stok *</label>
+                        <input type="number" id="stock" name="stock" value="{{ old('stock', $sparepart->stock) }}" min="0" required
+                            class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="price" class="block text-sm font-semibold text-dark mb-1.5">Harga (Rp) *</label>
+                    <input type="number" id="price" name="price" value="{{ old('price', $sparepart->price) }}" min="0" required
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary">
+                </div>
+
+                <div>
+                    <label for="photo" class="block text-sm font-semibold text-dark mb-1.5">Foto</label>
+                    @if($sparepart->photo_url)
+                        <div class="mb-2">
+                            <img src="{{ asset('storage/'.$sparepart->photo_url) }}" alt="{{ $sparepart->name }}" class="w-20 h-20 rounded-xl object-cover">
+                        </div>
+                    @endif
+                    <input type="file" id="photo" name="photo" accept="image/*"
+                        class="w-full border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-primary focus:ring-1 focus:ring-primary file:mr-3 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-sm file:bg-primary file:text-white file:cursor-pointer">
+                </div>
+
+                <div class="flex items-center gap-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" name="is_active" value="1" {{ old('is_active', $sparepart->is_active) ? 'checked' : '' }}
+                            class="rounded border-gray-300 text-primary focus:ring-primary">
+                        <span class="text-sm text-gray-600">Aktif</span>
+                    </label>
+                </div>
+
+                <div class="flex items-center gap-3 pt-2">
+                    <button type="submit" class="flex-1 bg-primary hover:bg-primary-600 text-white font-semibold py-2.5 px-6 rounded-xl transition shadow-lg shadow-primary/25">
+                        Update
+                    </button>
+                    <a href="{{ route('partner.spareparts.index') }}" class="px-6 py-2.5 text-sm font-medium text-gray-500 hover:text-dark border border-gray-200 rounded-xl transition">
+                        Batal
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</x-app-layout>

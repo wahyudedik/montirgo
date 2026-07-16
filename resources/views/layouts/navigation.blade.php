@@ -21,6 +21,12 @@
                         <x-nav-link :href="route('customer.chat.index')" :active="request()->routeIs('customer.chat.*')">
                             💬 {{ __('Chat') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('customer.reviews.index')" :active="request()->routeIs('customer.reviews.*')">
+                            ⭐ {{ __('Reviews') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('customer.history.index')" :active="request()->routeIs('customer.history.*')">
+                            📋 {{ __('History') }}
+                        </x-nav-link>
                         <x-nav-link :href="route('customer.sos.index')" :active="request()->routeIs('customer.sos.*')">
                             <span class="text-red-500">🚨</span> {{ __('SOS') }}
                         </x-nav-link>
@@ -29,6 +35,15 @@
                     @if(Auth::user()->isPartner())
                         <x-nav-link :href="route('partner.chat.index')" :active="request()->routeIs('partner.chat.*')">
                             💬 {{ __('Chat') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('partner.reviews.index')" :active="request()->routeIs('partner.reviews.*')">
+                            ⭐ {{ __('Reviews') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('partner.spareparts.index')" :active="request()->routeIs('partner.spareparts.*')">
+                            🔧 {{ __('Sparepart') }}
+                        </x-nav-link>
+                        <x-nav-link :href="route('partner.subscription.index')" :active="request()->routeIs('partner.subscription.*')">
+                            💎 {{ __('Subscription') }}
                         </x-nav-link>
                     @endif
 
@@ -111,6 +126,12 @@
                 <x-responsive-nav-link :href="route('customer.chat.index')" :active="request()->routeIs('customer.chat.*')">
                     💬 {{ __('Chat') }}
                 </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('customer.reviews.index')" :active="request()->routeIs('customer.reviews.*')">
+                    ⭐ {{ __('Reviews') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('customer.history.index')" :active="request()->routeIs('customer.history.*')">
+                    📋 {{ __('History') }}
+                </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('customer.sos.index')" :active="request()->routeIs('customer.sos.*')">
                     <span class="text-red-500">🚨</span> {{ __('SOS') }}
                 </x-responsive-nav-link>
@@ -119,6 +140,15 @@
             @if(Auth::user()->isPartner())
                 <x-responsive-nav-link :href="route('partner.chat.index')" :active="request()->routeIs('partner.chat.*')">
                     💬 {{ __('Chat') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('partner.reviews.index')" :active="request()->routeIs('partner.reviews.*')">
+                    ⭐ {{ __('Reviews') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('partner.spareparts.index')" :active="request()->routeIs('partner.spareparts.*')">
+                    🔧 {{ __('Sparepart') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('partner.subscription.index')" :active="request()->routeIs('partner.subscription.*')">
+                    💎 {{ __('Subscription') }}
                 </x-responsive-nav-link>
             @endif
 

@@ -1,10 +1,15 @@
 <?php
 
 use App\Http\Controllers\Customer\ChatController;
+use App\Http\Controllers\Customer\HistoryController;
 use App\Http\Controllers\Customer\OrderController;
+use App\Http\Controllers\Customer\ReviewController;
 use App\Http\Controllers\Customer\SosController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Partner\OrderController as PartnerOrderController;
+use App\Http\Controllers\Partner\ReviewController as PartnerReviewController;
+use App\Http\Controllers\Partner\SparepartController;
+use App\Http\Controllers\Partner\SubscriptionController;
 use App\Http\Controllers\Partner\WalletController as PartnerWalletController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -41,6 +46,14 @@ Route::middleware(['auth', 'verified'])->prefix('customer')->name('customer.')->
     Route::get('/orders/{order}/chat', [ChatController::class, 'show'])->name('chat.show');
     Route::post('/orders/{order}/chat/send', [ChatController::class, 'send'])->name('chat.send');
     Route::get('/orders/{order}/chat/poll', [ChatController::class, 'poll'])->name('chat.poll');
+
+    // Reviews
+    Route::get('/reviews', [ReviewController::class, 'index'])->name('reviews.index');
+    Route::get('/orders/{order}/review', [ReviewController::class, 'create'])->name('reviews.create');
+    Route::post('/orders/{order}/review', [ReviewController::class, 'store'])->name('reviews.store');
+
+    // Service History
+    Route::get('/history', [HistoryController::class, 'index'])->name('history.index');
 });
 
 // Partner Routes
@@ -62,6 +75,18 @@ Route::middleware(['auth', 'verified', 'role:partner'])->prefix('partner')->name
     Route::get('/wallet/withdraw', [PartnerWalletController::class, 'withdrawForm'])->name('wallet.withdraw');
     Route::post('/wallet/withdraw', [PartnerWalletController::class, 'withdraw'])->name('wallet.withdraw.store');
     Route::get('/wallet/history', [PartnerWalletController::class, 'history'])->name('wallet.history');
+
+    // Reviews
+    Route::get('/reviews', [PartnerReviewController::class, 'index'])->name('reviews.index');
+    Route::post('/reviews/{review}/reply', [PartnerReviewController::class, 'reply'])->name('reviews.reply');
+
+    // Subscription
+    Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
+    Route::post('/subscription', [SubscriptionController::class, 'subscribe'])->name('subscription.subscribe');
+    Route::delete('/subscription', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
+
+    // Spareparts
+    Route::resource('spareparts', SparepartController::class)->except(['show']);
 });
 
 require __DIR__.'/auth.php';
