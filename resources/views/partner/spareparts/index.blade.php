@@ -54,7 +54,7 @@
                                     <td class="px-5 py-4 text-gray-600">{{ $item->category }}</td>
                                     <td class="px-5 py-4 text-right font-medium text-dark">Rp {{ number_format($item->price, 0, ',', '.') }}</td>
                                     <td class="px-5 py-4 text-right">
-                                        <span class="{{ $item->stock <= 0 ? 'text-red-600' : $item->stock <= 5 ? 'text-yellow-600' : 'text-gray-600' }}">
+                                        <span class="{{ $item->stock <= 0 ? 'text-red-600' : ($item->stock <= 5 ? 'text-yellow-600' : 'text-gray-600') }}">
                                             {{ $item->stock }}
                                         </span>
                                     </td>

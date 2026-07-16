@@ -30,6 +30,15 @@ class AuthenticatedSessionController extends Controller
 
         $user = $request->user();
 
+        // Partner with pending status → redirect to pending page
+        if ($user->isPartner()) {
+            $partner = $user->partner;
+
+            if ($partner && $partner->isPending()) {
+                return redirect()->intended(route('partner.pending', absolute: false));
+            }
+        }
+
         $redirectTo = match (true) {
             $user->isAdmin() => route('admin.dashboard', absolute: false),
             $user->isPartner() => route('dashboard', absolute: false),

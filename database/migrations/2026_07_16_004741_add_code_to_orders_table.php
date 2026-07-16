@@ -28,10 +28,8 @@ return new class extends Migration
             DB::table('orders')->where('id', $order->id)->update(['code' => $code]);
         }
 
-        // Add unique constraint if not already present
-        $indexExists = DB::select("SHOW INDEX FROM orders WHERE Key_name = 'orders_code_unique'");
-
-        if (empty($indexExists)) {
+        // Add unique constraint if not already present (database-agnostic)
+        if (! Schema::hasIndex('orders', 'orders_code_unique')) {
             Schema::table('orders', function ($table) {
                 $table->string('code', 20)->nullable(false)->unique()->change();
             });

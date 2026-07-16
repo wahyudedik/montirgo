@@ -25,3 +25,12 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# ============================================================
+# MOBILE PROJECT — DO NOT COMMIT TO GIT
+# ============================================================
+# React Native monorepo project (customer + partner apps)
+# Dikelola secara terpisah, tidak perlu di-version control
+# di repository backend Laravel ini.
+# ============================================================
+/mobile_montirgo/

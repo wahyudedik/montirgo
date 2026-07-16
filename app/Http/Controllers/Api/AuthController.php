@@ -28,14 +28,33 @@ class AuthController extends Controller
             'role' => ['sometimes', 'in:customer,partner'],
         ]);
 
+        // Security: Block admin registration via public API — admin only via seeder/manual
+        $requestedRole = $validated['role'] ?? 'customer';
+        if ($requestedRole === 'admin') {
+            return response()->json([
+                'message' => 'Registrasi admin tidak diperbolehkan melalui publik API',
+            ], 403);
+        }
+
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'phone' => $validated['phone'] ?? null,
-            'role' => $validated['role'] ?? 'customer',
+            'role' => $requestedRole,
             'is_active' => true,
         ]);
+
+        // Partner: create blank partner record for verification flow
+        if ($requestedRole === 'partner') {
+            $user->partner()->create([
+                'workshop_name' => $validated['name'],
+                'workshop_address' => '',
+                'workshop_lat' => 0,
+                'workshop_lng' => 0,
+                'status' => 'pending',
+            ]);
+        }
 
         $token = $user->createToken('mobile-app')->plainTextToken;
 

@@ -18,7 +18,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex items-center justify-between h-16 lg:h-20">
                     <a href="/" class="flex items-center gap-2.5">
-                        <img src="{{ asset('logo.png') }}" alt="MontirGo" class="h-10 lg:h-12">
+                        <img src="{{ asset('logo-rm.png') }}" alt="MontirGo" class="h-10 lg:h-12">
                     </a>
                     <div class="hidden lg:flex items-center gap-8">
                         <a href="#layanan" class="text-sm font-medium text-gray-600 hover:text-primary transition-colors">Layanan</a>
@@ -96,7 +96,7 @@
                             <div class="absolute inset-0 flex items-center justify-center"><div class="w-72 h-72 lg:w-96 lg:h-96 border-2 border-dashed border-primary/20 rounded-full animate-spin" style="animation-duration:30s"></div></div>
                             <div class="absolute inset-0 flex items-center justify-center"><div class="w-56 h-56 lg:w-72 lg:h-72 border border-primary/10 rounded-full animate-spin" style="animation-duration:20s;animation-direction:reverse"></div></div>
                             <div class="relative z-10 flex items-center justify-center w-72 h-72 lg:w-96 lg:h-96">
-                                <img src="{{ asset('logo.png') }}" alt="MontirGo Logo" class="w-48 h-48 lg:w-64 lg:h-64 drop-shadow-2xl">
+                                <img src="{{ asset('logo-rm.png') }}" alt="MontirGo Logo" class="w-48 h-48 lg:w-64 lg:h-64 drop-shadow-2xl">
                             </div>
                             <div class="absolute -top-2 -right-4 lg:top-4 lg:right-0 bg-white rounded-2xl shadow-xl shadow-gray-200/50 p-4 flex items-center gap-3 border border-gray-100 animate-bounce" style="animation-duration:3s">
                                 <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center"><svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg></div>
@@ -214,10 +214,10 @@
                         <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">Tombol SOS — Bantuan Darurat Satu Klik</h2>
                         <p class="text-gray-400 leading-relaxed mb-8">Dalam situasi darurat, Anda tidak perlu mengisi form yang rumit. Cukup tekan tombol SOS, pilih kategori masalah, dan mekanik terdekat akan segera dikirim ke lokasi Anda.</p>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">🛞</span><div><div class="text-sm font-semibold text-white">Ban Bocor</div><div class="text-xs text-gray-500">Tambal & ganti</div></div></div>
-                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">🔋</span><div><div class="text-sm font-semibold text-white">Aki Soak</div><div class="text-xs text-gray-500">Jumper & ganti</div></div></div>
-                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">⛽</span><div><div class="text-sm font-semibold text-white">Kehabisan Bensin</div><div class="text-xs text-gray-500">Pengisian darurat</div></div></div>
-                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">🌡️</span><div><div class="text-sm font-semibold text-white">Mesin Overheat</div><div class="text-xs text-gray-500">Mogok total</div></div></div>
+                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">🛞</span><div><div class="text-sm font-semibold text-white">Ban Bocor</div><div class="text-xs text-white">Tambal & ganti</div></div></div>
+                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">🔋</span><div><div class="text-sm font-semibold text-white">Aki Soak</div><div class="text-xs text-white">Jumper & ganti</div></div></div>
+                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">⛽</span><div><div class="text-sm font-semibold text-white">Kehabisan Bensin</div><div class="text-xs text-white">Pengisian darurat</div></div></div>
+                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">🌡️</span><div><div class="text-sm font-semibold text-white">Mesin Overheat</div><div class="text-xs text-white">Mogok total</div></div></div>
                         </div>
                     </div>
                     <div class="flex justify-center">
@@ -235,7 +235,7 @@
                                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                                     SOS — Minta Bantuan
                                 </button>
-                                <div class="mt-4 flex items-center justify-center gap-2 text-xs text-gray-500">
+                                <div class="mt-4 flex items-center justify-center gap-2 text-xs text-white">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                                     Mencari mekanik dalam radius 5 km
                                 </div>
@@ -340,7 +340,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
                     <div class="lg:col-span-1">
-                        <a href="/" class="flex items-center gap-2.5 mb-4"><img src="{{ asset('logo.png') }}" alt="MontirGo" class="h-10 brightness-0 invert"></a>
+                        <a href="/" class="flex items-center gap-2.5 mb-4"><img src="{{ asset('logo-rm.png') }}" alt="MontirGo" class="h-10 brightness-0 invert"></a>
                         <p class="text-sm text-gray-400 leading-relaxed mb-4">Solusi cepat dan andal untuk kendala kendaraan di jalan. Mekanik datang ke lokasi Anda.</p>
                         <div class="flex gap-3">
                             <a href="#" class="w-9 h-9 bg-white/10 hover:bg-primary rounded-lg flex items-center justify-center transition-colors"><svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg></a>

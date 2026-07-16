@@ -63,12 +63,18 @@
         </button>
     </form>
 
-    <!-- Register Link -->
-    <div class="mt-6 text-center">
+    <!-- Register Links -->
+    <div class="mt-6 text-center space-y-2">
         <p class="text-sm text-gray-500">
             Belum punya akun?
             <a href="{{ route('register') }}" class="text-primary font-semibold hover:text-primary-600 transition">
-                Daftar sekarang
+                Daftar sebagai Customer
+            </a>
+        </p>
+        <p class="text-sm text-gray-500">
+            Ingin jadi mitra bengkel?
+            <a href="{{ route('partner.register') }}" class="text-amber-600 font-semibold hover:text-amber-700 transition">
+                Daftar sebagai Partner
             </a>
         </p>
     </div>

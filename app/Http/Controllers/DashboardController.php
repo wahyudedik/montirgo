@@ -14,6 +14,15 @@ class DashboardController extends Controller
     {
         $user = $request->user();
 
+        // Partner with pending status → redirect to pending page
+        if ($user->isPartner()) {
+            $partner = $user->partner;
+
+            if (! $partner || $partner->isPending()) {
+                return redirect()->route('partner.pending');
+            }
+        }
+
         return match (true) {
             $user->isAdmin() => $this->adminDashboard($user),
             $user->isPartner() => $this->partnerDashboard($user),

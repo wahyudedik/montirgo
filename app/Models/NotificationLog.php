@@ -13,6 +13,8 @@ class NotificationLog extends Model
 {
     use HasFactory;
 
+    protected $table = 'notifications_log';
+
     protected $fillable = [
         'user_id',
         'type',

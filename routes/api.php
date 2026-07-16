@@ -14,8 +14,10 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 // ─── Public Routes ─────────────────────────────────────
-Route::post('/v1/auth/register', [AuthController::class, 'register']);
-Route::post('/v1/auth/login', [AuthController::class, 'login']);
+Route::post('/v1/auth/register', [AuthController::class, 'register'])
+    ->middleware('throttle:5,1');
+Route::post('/v1/auth/login', [AuthController::class, 'login'])
+    ->middleware('throttle:10,1');
 
 // Partner nearby (public)
 Route::get('/v1/partners/nearby', [PartnerController::class, 'nearby']);

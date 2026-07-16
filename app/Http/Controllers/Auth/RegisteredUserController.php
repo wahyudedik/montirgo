@@ -36,10 +36,14 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Security: Web registration only creates customer accounts
+        // Admin & partner accounts created via seeder or API only
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'role' => 'customer',
+            'is_active' => true,
         ]);
 
         event(new Registered($user));
