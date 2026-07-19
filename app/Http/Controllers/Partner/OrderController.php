@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\OrderPhoto;
 use App\Services\DispatchService;
+use App\Services\FileUploadService;
 use App\Services\NotificationService;
 use App\Services\PaymentService;
 use Illuminate\Http\RedirectResponse;
@@ -142,6 +143,15 @@ class OrderController extends Controller
                     $paymentService->confirmPayment($payment);
                 }
             }
+
+            // Auto Online: kembalikan partner ke status online setelah order selesai
+            $partner = $order->partner;
+            if ($partner && $partner->partner_status !== 'online') {
+                $partner->update([
+                    'partner_status' => 'online',
+                    'is_available' => true,
+                ]);
+            }
         }
 
         $oldStatus = $order->status;
@@ -186,7 +196,7 @@ class OrderController extends Controller
 
         $user = Auth::user();
 
-        $path = $request->file('photo')->store('order-photos', 'public');
+        $path = app(FileUploadService::class)->upload($request->file('photo'), 'order-photos');
 
         OrderPhoto::create([
             'order_id' => $order->id,

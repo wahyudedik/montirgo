@@ -16,10 +16,11 @@ class OrderFactory extends Factory
 
     public function definition(): array
     {
-        $calloutFee = fake()->randomElement([15000, 20000, 25000, 30000]);
+        $calloutFee = 30000.00;
         $serviceFee = fake()->numberBetween(50000, 500000);
         $totalAmount = $calloutFee + $serviceFee;
-        $platformCommission = $calloutFee * 0.2 + ($serviceFee > 0 ? $serviceFee * fake()->randomElement([0.05, 0.08, 0.10]) : 0);
+        $commissionPercent = fake()->randomElement([5, 7, 10]);
+        $platformCommission = $serviceFee * ($commissionPercent / 100);
 
         return [
             'user_id' => User::factory()->customer(),
@@ -37,9 +38,9 @@ class OrderFactory extends Factory
             'service_fee' => $serviceFee,
             'total_amount' => $totalAmount,
             'platform_commission' => round($platformCommission, 2),
-            'partner_earning' => $totalAmount - $platformCommission,
-            'payment_method' => fake()->randomElement(['cash', 'wallet', 'qris']),
-            'payment_status' => fake()->randomElement(['unpaid', 'paid']),
+            'partner_earning' => $totalAmount - round($platformCommission, 2),
+            'payment_method' => fake()->randomElement(['qris', 'ewallet', 'bank_transfer']),
+            'payment_status' => fake()->randomElement(['pending', 'paid']),
         ];
     }
 

@@ -6,6 +6,7 @@
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>{{ config('app.name', 'MontirGo') }}</title>
+        <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -28,7 +29,7 @@
                 <div class="relative z-10 flex flex-col items-center justify-center w-full px-12">
                     <!-- Logo -->
                     <a href="/" class="flex items-center gap-3 mb-8">
-                        <img src="{{ asset('logo.png') }}" alt="MontirGo" class="h-16 w-auto">
+                        <img src="{{ asset('logo-rm.png') }}" alt="MontirGo" class="h-16 w-auto">
                         <span class="text-3xl font-bold text-white">Montir<span class="text-primary">Go</span></span>
                     </a>
 
@@ -76,7 +77,7 @@
                     <!-- Mobile Logo -->
                     <div class="lg:hidden flex items-center justify-center gap-2 mb-8">
                         <a href="/" class="flex items-center gap-2">
-                            <img src="{{ asset('logo.png') }}" alt="MontirGo" class="h-10 w-auto">
+                            <img src="{{ asset('logo-rm.png') }}" alt="MontirGo" class="h-10 w-auto">
                             <span class="text-xl font-bold text-dark">Montir<span class="text-primary">Go</span></span>
                         </a>
                     </div>

@@ -20,13 +20,13 @@
             <div class="lg:col-span-2 space-y-6">
                 <!-- Order Map -->
                 <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-lg font-semibold text-dark mb-4">📍 Lokasi Order</h3>
+                    <h3 class="text-lg font-semibold text-dark mb-4 flex items-center gap-2"><svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg> Lokasi Order</h3>
                     @php
                         $mapMarkers = [
-                            ['lat' => (float) $order->location_lat, 'lng' => (float) $order->location_lng, 'label' => '📍 Lokasi Customer', 'color' => '#3B82F6'],
+                            ['lat' => (float) $order->location_lat, 'lng' => (float) $order->location_lng, 'label' => 'Lokasi Customer', 'color' => '#3B82F6'],
                         ];
                         if ($order->partner && $order->partner->workshop_lat && $order->partner->workshop_lng) {
-                            $mapMarkers[] = ['lat' => (float) $order->partner->workshop_lat, 'lng' => (float) $order->partner->workshop_lng, 'label' => '🔧 ' . $order->partner->workshop_name, 'color' => '#10B981'];
+                            $mapMarkers[] = ['lat' => (float) $order->partner->workshop_lat, 'lng' => (float) $order->partner->workshop_lng, 'label' => $order->partner->workshop_name, 'color' => '#10B981'];
                         }
                     @endphp
                     <x-map
@@ -39,7 +39,7 @@
                         :markers="$mapMarkers"
                     />
                     @if($order->location_address)
-                        <p class="text-sm text-gray-500 mt-3">📍 {{ $order->location_address }}</p>
+                        <p class="text-sm text-gray-500 mt-3 flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg> {{ $order->location_address }}</p>
                     @endif
                 </div>
 
@@ -54,7 +54,7 @@
                         <div><span class="text-gray-500">Escalation:</span> <span class="font-medium">Level {{ $order->dispatch_escalation }}</span></div>
                         @if($order->is_sos)
                             <div class="col-span-2 bg-red-50 border border-red-200 rounded-lg p-2">
-                                <span class="text-red-600 text-sm font-semibold">🚨 SOS Emergency — {{ $order->sos_type }}</span>
+                                <span class="text-red-600 text-sm font-semibold flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg> SOS Emergency — {{ $order->sos_type }}</span>
                             </div>
                         @endif
                     </div>
@@ -95,7 +95,7 @@
                 @if($order->review)
                     <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
                         <h3 class="text-lg font-semibold text-dark mb-3">Customer Review</h3>
-                        <div class="text-yellow-500 mb-2">★ {{ $order->review->rating }}/5</div>
+                        <div class="text-yellow-500 mb-2"><svg class="inline w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg> {{ $order->review->rating }}/5</div>
                         <p class="text-sm text-gray-600">{{ $order->review->comment }}</p>
                     </div>
                 @endif

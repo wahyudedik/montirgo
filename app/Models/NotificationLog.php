@@ -29,6 +29,7 @@ class NotificationLog extends Model
     protected $casts = [
         'data' => 'array',
         'sent_at' => 'datetime',
+        'read_at' => 'datetime',
     ];
 
     public function user(): BelongsTo

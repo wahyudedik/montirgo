@@ -7,12 +7,14 @@ namespace App\Services;
 use App\Jobs\DispatchTimeoutJob;
 use App\Models\Order;
 use App\Models\Partner;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class EmergencyService
 {
+    public function __construct(
+        private readonly GeolocationService $geolocation,
+    ) {}
+
     /** Kategori darurat */
     public const SOS_CATEGORIES = [
         'flat_tire' => [
@@ -95,10 +97,10 @@ class EmergencyService
 
         Log::info("🚨 SOS searching partners within {$radiusKm}km for order #{$order->code}");
 
-        $partners = $this->getNearbyPartners(
+        $partners = $this->geolocation->findNearbyAvailablePartners(
             $order->location_lat,
             $order->location_lng,
-            $radiusKm
+            $radiusKm,
         );
 
         if ($partners->isEmpty()) {
@@ -114,37 +116,6 @@ class EmergencyService
         foreach ($batch as $partner) {
             $this->sendToPartner($order, $partner);
         }
-    }
-
-    /**
-     * Cari partner terdekat menggunakan Haversine formula.
-     */
-    private function getNearbyPartners(string $lat, string $lng, float $radiusKm): Collection
-    {
-        $radiusMeters = $radiusKm * 1000;
-
-        return Partner::query()
-            ->where('status', 'approved')
-            ->where('is_online', true)
-            ->where('is_available', true)
-            ->whereNotNull('workshop_lat')
-            ->whereNotNull('workshop_lng')
-            ->select([
-                'partners.*',
-                DB::raw("(
-                    6371000 * acos(
-                        cos(radians({$lat}))
-                        * cos(radians(workshop_lat))
-                        * cos(radians(workshop_lng) - radians({$lng}))
-                        + sin(radians({$lat}))
-                        * sin(radians(workshop_lat))
-                    )
-                ) AS distance_meters"),
-            ])
-            ->having('distance_meters', '<=', $radiusMeters)
-            ->orderBy('distance_meters')
-            ->limit(10)
-            ->get();
     }
 
     /**

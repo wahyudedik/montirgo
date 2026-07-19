@@ -10,9 +10,11 @@ use App\Http\Controllers\Partner\OrderController as PartnerOrderController;
 use App\Http\Controllers\Partner\ReviewController as PartnerReviewController;
 use App\Http\Controllers\Partner\ServiceCostController;
 use App\Http\Controllers\Partner\SparepartController;
-use App\Http\Controllers\Partner\SubscriptionController;
 use App\Http\Controllers\Partner\WalletController as PartnerWalletController;
 use App\Http\Controllers\ProfileController;
+use App\Models\NotificationLog;
+use App\Services\NotificationService;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -27,6 +29,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Notifications (Web)
+    Route::get('/notifications', function (Request $request) {
+        $service = app(NotificationService::class);
+        $unreadCount = $service->getUnreadCount($request->user());
+        $notifications = NotificationLog::where('user_id', $request->user()->id)
+            ->orderBy('created_at', 'desc')
+            ->limit(20)
+            ->get();
+
+        return response()->json([
+            'unread_count' => $unreadCount,
+            'data' => $notifications,
+        ]);
+    })->name('notifications.index');
+
+    Route::post('/notifications/read-all', function (Request $request) {
+        $service = app(NotificationService::class);
+        $service->markAllAsRead($request->user());
+
+        return response()->json(['success' => true]);
+    })->name('notifications.read-all');
 });
 
 // Customer Routes
@@ -80,11 +104,6 @@ Route::middleware(['auth', 'verified', 'role:partner'])->prefix('partner')->name
     // Reviews
     Route::get('/reviews', [PartnerReviewController::class, 'index'])->name('reviews.index');
     Route::post('/reviews/{review}/reply', [PartnerReviewController::class, 'reply'])->name('reviews.reply');
-
-    // Subscription
-    Route::get('/subscription', [SubscriptionController::class, 'index'])->name('subscription.index');
-    Route::post('/subscription', [SubscriptionController::class, 'subscribe'])->name('subscription.subscribe');
-    Route::delete('/subscription', [SubscriptionController::class, 'cancel'])->name('subscription.cancel');
 
     // Spareparts
     Route::resource('spareparts', SparepartController::class)->except(['show']);

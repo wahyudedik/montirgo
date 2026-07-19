@@ -9,7 +9,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('partners', function (Blueprint $table) {
-            $table->string('subscription_status')->default('basic')->after('status');
             $table->integer('total_reviews')->default(0)->after('total_orders');
         });
     }
@@ -17,7 +16,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('partners', function (Blueprint $table) {
-            $table->dropColumn(['subscription_status', 'total_reviews']);
+            $table->dropColumn('total_reviews');
         });
     }
 };

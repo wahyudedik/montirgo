@@ -7,14 +7,51 @@
         --color-primary: 249 115 22;
         --color-dark: 28 41 56;
     }
+
+    html {
+        scroll-behavior: smooth;
+    }
+
+    body {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
 }
 
 @layer components {
     .btn-primary {
-        @apply bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-lg shadow-primary-500/25;
+        @apply bg-primary-500 hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 shadow-lg shadow-primary-500/25 hover:shadow-xl hover:shadow-primary-500/30;
+    }
+
+    .btn-secondary {
+        @apply bg-white hover:bg-gray-50 text-dark font-semibold py-3 px-6 rounded-xl border border-gray-200 hover:border-gray-300 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-gray-300 focus:ring-offset-2;
+    }
+
+    .card {
+        @apply bg-white rounded-2xl shadow-sm border border-gray-100;
     }
 
     .input-field {
         @apply w-full border-gray-300 rounded-xl focus:border-primary-500 focus:ring-primary-500 shadow-sm;
+    }
+}
+
+@layer utilities {
+    .scrollbar-thin {
+        scrollbar-width: thin;
+        scrollbar-color: #d1d5db transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    .scrollbar-thin::-webkit-scrollbar-thumb {
+        background-color: #d1d5db;
+        border-radius: 3px;
     }
 }

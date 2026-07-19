@@ -19,6 +19,8 @@ class VehicleResource extends JsonResource
             'year' => $this->year,
             'color' => $this->color,
             'license_plate' => $this->license_plate,
+            'photo' => $this->photo,
+            'is_default' => (bool) $this->is_default,
             'created_at' => $this->created_at->toIso8601String(),
         ];
     }

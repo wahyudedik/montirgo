@@ -7,6 +7,8 @@ namespace App\Services;
 use App\Models\NotificationLog;
 use App\Models\Partner;
 use App\Models\User;
+use App\Models\UserFcmToken;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -34,7 +36,19 @@ class NotificationService
      */
     public function sendFcm(User $user, string $title, string $body, array $data = [], string $type = 'general'): NotificationLog
     {
-        $fcmToken = $user->fcm_token ?? null;
+        // Cek user notification preferences — skip jika user nonaktifkan tipe ini
+        if (! $user->isNotificationAllowed($type)) {
+            return NotificationLog::create([
+                'user_id' => $user->id,
+                'type' => $type,
+                'title' => $title,
+                'body' => $body,
+                'data' => $data,
+                'channel' => 'fcm',
+                'status' => 'skipped',
+                'sent_at' => now(),
+            ]);
+        }
 
         $log = NotificationLog::create([
             'user_id' => $user->id,
@@ -46,58 +60,29 @@ class NotificationService
             'status' => 'pending',
         ]);
 
-        if (! $fcmToken) {
+        $tokens = $this->getTargetTokens($user);
+
+        if ($tokens->isEmpty()) {
             $log->update(['status' => 'failed']);
 
             return $log;
         }
 
-        try {
-            $accessToken = $this->getFcmAccessToken();
+        $accessToken = $this->getFcmAccessToken();
+        $anySuccess = false;
 
-            if (! $accessToken) {
-                $log->update(['status' => 'failed']);
-
-                return $log;
+        foreach ($tokens as $tokenRecord) {
+            $fcmToken = is_string($tokenRecord) ? $tokenRecord : $tokenRecord->token;
+            $sent = $this->sendFcmToToken($accessToken, $fcmToken, $title, $body, $data, $user, 'montirgo_default', 'default');
+            if ($sent) {
+                $anySuccess = true;
             }
-
-            $response = Http::withToken($accessToken)
-                ->post("https://fcm.googleapis.com/v1/projects/{$this->getProjectId()}/messages:send", [
-                    'message' => [
-                        'token' => $fcmToken,
-                        'notification' => [
-                            'title' => $title,
-                            'body' => $body,
-                        ],
-                        'data' => collect($data)->mapWithKeys(fn ($value, $key) => [$key => (string) $value])->toArray(),
-                        'android' => [
-                            'priority' => 'high',
-                        ],
-                        'apns' => [
-                            'headers' => [
-                                'apns-priority' => '10',
-                            ],
-                        ],
-                    ],
-                ]);
-
-            if ($response->successful()) {
-                $log->update(['status' => 'sent', 'sent_at' => now()]);
-            } else {
-                Log::warning('FCM send failed', [
-                    'user_id' => $user->id,
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ]);
-                $log->update(['status' => 'failed']);
-            }
-        } catch (\Exception $e) {
-            Log::error('FCM send error', [
-                'user_id' => $user->id,
-                'error' => $e->getMessage(),
-            ]);
-            $log->update(['status' => 'failed']);
         }
+
+        $log->update([
+            'status' => $anySuccess ? 'sent' : 'failed',
+            'sent_at' => $anySuccess ? now() : null,
+        ]);
 
         return $log;
     }
@@ -161,11 +146,93 @@ class NotificationService
                 'distance_km' => $distanceKm,
             ], 'new_order');
 
-            $this->sendFcm($partner->user, $title, $body, [
+            // Gunakan sound/vibration untuk notifikasi order baru (priority tinggi)
+            $this->sendFcmWithSound($partner->user, $title, $body, [
                 'order_code' => $orderCode,
                 'type' => 'new_order',
-            ], 'new_order');
+            ], 'new_order', 'order_alert');
         }
+    }
+
+    /**
+     * Kirim notifikasi SOS emergency — priority tertinggi dengan sound khusus.
+     */
+    public function notifySosEmergency(User $user, string $orderCode, string $category): void
+    {
+        $categoryLabels = [
+            'flat_tire' => 'Ban Bocor',
+            'dead_battery' => 'Aki Mati',
+            'out_of_fuel' => 'Kehabisan BBM',
+            'locked_keys' => 'Kunci Tertinggal',
+            'overheat' => 'Mesin Overheat',
+        ];
+        $categoryLabel = $categoryLabels[$category] ?? $category;
+
+        $title = 'SOS Darurat!';
+        $body = "Order {$orderCode} - {$categoryLabel}";
+
+        $this->sendInApp($user, $title, $body, [
+            'order_code' => $orderCode,
+            'category' => $category,
+        ], 'sos');
+
+        // SOS menggunakan sound emergency dengan vibration pattern khusus
+        $this->sendFcmWithSound($user, $title, $body, [
+            'order_code' => $orderCode,
+            'category' => $category,
+            'type' => 'sos',
+        ], 'sos', 'sos_emergency');
+    }
+
+    /**
+     * Kirim notifikasi saat partner mendapat income dari order.
+     */
+    public function notifyWalletCredit(User $user, float $amount, string $orderCode): void
+    {
+        $formatted = 'Rp'.number_format($amount, 0, ',', '.');
+        $title = 'Pendapatan Baru';
+        $body = "Anda mendapat pendapatan {$formatted} dari order {$orderCode}.";
+
+        $this->sendFcm($user, $title, $body, [
+            'type' => 'wallet',
+            'action' => 'credit',
+            'amount' => (string) $amount,
+            'order_code' => $orderCode,
+        ], 'wallet');
+    }
+
+    /**
+     * Kirim notifikasi saat withdraw request disetujui admin.
+     */
+    public function notifyWithdrawApproved(User $user, float $amount, string $bankName): void
+    {
+        $formatted = 'Rp'.number_format($amount, 0, ',', '.');
+        $title = 'Penarikan Disetujui';
+        $body = "Penarikan {$formatted} ke {$bankName} telah disetujui dan akan segera diproses.";
+
+        $this->sendFcm($user, $title, $body, [
+            'type' => 'wallet',
+            'action' => 'withdraw_approved',
+            'amount' => (string) $amount,
+            'bank_name' => $bankName,
+        ], 'wallet');
+    }
+
+    /**
+     * Kirim notifikasi saat withdraw request ditolak admin.
+     */
+    public function notifyWithdrawRejected(User $user, float $amount, string $reason): void
+    {
+        $formatted = 'Rp'.number_format($amount, 0, ',', '.');
+        $title = 'Penarikan Ditolak';
+        $body = "Penarikan {$formatted} ditolak. Alasan: {$reason}. Saldo telah dikembalikan.";
+
+        $this->sendFcm($user, $title, $body, [
+            'type' => 'wallet',
+            'action' => 'withdraw_rejected',
+            'amount' => (string) $amount,
+            'reason' => $reason,
+        ], 'wallet');
     }
 
     /**
@@ -186,6 +253,180 @@ class NotificationService
         return NotificationLog::where('user_id', $user->id)
             ->whereNull('read_at')
             ->update(['read_at' => now()]);
+    }
+
+    /**
+     * Hapus FCM token yang sudah tidak aktif (stale) untuk menjaga
+     * kualitas pengiriman push notification.
+     *
+     * Token dianggap stale jika user tidak login selama N hari.
+     */
+    public function cleanStaleTokens(int $inactiveDays = 30): int
+    {
+        $cutoffDate = now()->subDays($inactiveDays);
+
+        // Bersihkan dari tabel user_fcm_tokens
+        $deletedFromTable = UserFcmToken::where('last_used_at', '<', $cutoffDate)
+            ->orWhere(function ($query) use ($cutoffDate) {
+                $query->whereNull('last_used_at')
+                    ->where('created_at', '<', $cutoffDate);
+            })
+            ->delete();
+
+        // Bersihkan legacy fcm_token field juga
+        $updatedLegacy = User::whereNotNull('fcm_token')
+            ->where(function ($query) use ($cutoffDate) {
+                $query->whereNull('last_active_at')
+                    ->orWhere('last_active_at', '<', $cutoffDate);
+            })
+            ->update(['fcm_token' => null]);
+
+        return $deletedFromTable + $updatedLegacy;
+    }
+
+    /**
+     * Kirim notifikasi dengan sound & vibration untuk priority tinggi.
+     */
+    public function sendFcmWithSound(User $user, string $title, string $body, array $data = [], string $type = 'general', string $sound = 'default'): NotificationLog
+    {
+        if (! $user->isNotificationAllowed($type)) {
+            return NotificationLog::create([
+                'user_id' => $user->id,
+                'type' => $type,
+                'title' => $title,
+                'body' => $body,
+                'data' => $data,
+                'channel' => 'fcm',
+                'status' => 'skipped',
+                'sent_at' => now(),
+            ]);
+        }
+
+        $log = NotificationLog::create([
+            'user_id' => $user->id,
+            'type' => $type,
+            'title' => $title,
+            'body' => $body,
+            'data' => $data,
+            'channel' => 'fcm',
+            'status' => 'pending',
+        ]);
+
+        $tokens = $this->getTargetTokens($user);
+
+        if ($tokens->isEmpty()) {
+            $log->update(['status' => 'failed']);
+
+            return $log;
+        }
+
+        $accessToken = $this->getFcmAccessToken();
+        $anySuccess = false;
+
+        foreach ($tokens as $tokenRecord) {
+            $fcmToken = is_string($tokenRecord) ? $tokenRecord : $tokenRecord->token;
+            $sent = $this->sendFcmToToken($accessToken, $fcmToken, $title, $body, $data, $user, 'montirgo_high_priority', $sound, true);
+            if ($sent) {
+                $anySuccess = true;
+            }
+        }
+
+        $log->update([
+            'status' => $anySuccess ? 'sent' : 'failed',
+            'sent_at' => $anySuccess ? now() : null,
+        ]);
+
+        return $log;
+    }
+
+    /**
+     * Dapatkan semua target FCM token untuk user (multi-device + legacy fallback).
+     *
+     * @return Collection<int, string>
+     */
+    private function getTargetTokens(User $user): Collection
+    {
+        // Ambil dari tabel user_fcm_tokens (multi-device)
+        $tokens = $user->getActiveFcmTokens()->pluck('token');
+
+        // Fallback: tambahkan legacy fcm_token jika belum ada di collection
+        if ($user->fcm_token && ! $tokens->contains($user->fcm_token)) {
+            $tokens->push($user->fcm_token);
+        }
+
+        return $tokens;
+    }
+
+    /**
+     * Kirim FCM ke satu token.
+     */
+    private function sendFcmToToken(
+        ?string $accessToken,
+        string $fcmToken,
+        string $title,
+        string $body,
+        array $data,
+        User $user,
+        string $channelId,
+        string $sound,
+        bool $withVibration = false,
+    ): bool {
+        if (! $accessToken) {
+            return false;
+        }
+
+        try {
+            $payload = [
+                'message' => [
+                    'token' => $fcmToken,
+                    'notification' => [
+                        'title' => $title,
+                        'body' => $body,
+                    ],
+                    'data' => collect($data)->mapWithKeys(fn ($value, $key) => [$key => (string) $value])->toArray(),
+                    'android' => [
+                        'priority' => 'high',
+                        'notification' => array_merge([
+                            'channel_id' => $channelId,
+                            'sound' => $sound,
+                        ], $withVibration ? ['vibrate_timings_ms' => [0, 250, 250, 250]] : []),
+                    ],
+                    'apns' => [
+                        'headers' => [
+                            'apns-priority' => '10',
+                        ],
+                        'payload' => [
+                            'aps' => [
+                                'sound' => $sound,
+                                'badge' => $this->getUnreadCount($user),
+                            ],
+                        ],
+                    ],
+                ],
+            ];
+
+            $response = Http::withToken($accessToken)
+                ->post("https://fcm.googleapis.com/v1/projects/{$this->getProjectId()}/messages:send", $payload);
+
+            if ($response->successful()) {
+                return true;
+            }
+
+            Log::warning('FCM send failed for token', [
+                'user_id' => $user->id,
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            return false;
+        } catch (\Exception $e) {
+            Log::error('FCM send error for token', [
+                'user_id' => $user->id,
+                'error' => $e->getMessage(),
+            ]);
+
+            return false;
+        }
     }
 
     private function getProjectId(): ?string

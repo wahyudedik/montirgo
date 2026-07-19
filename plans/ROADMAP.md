@@ -5,7 +5,7 @@
 
 ---
 
-## 📊 Status Proyek Saat Ini
+## Status Proyek Saat Ini
 
 | Item | Status |
 |:---|:---|
@@ -35,7 +35,7 @@
 
 ---
 
-## 🏗️ Arsitektur Sistem
+## Arsitektur Sistem
 
 ```mermaid
 graph TB
@@ -85,7 +85,7 @@ graph TB
 
 ---
 
-## 🗃️ Database Schema
+## Database Schema
 
 ### ERD — Struktur Tabel Utama
 
@@ -285,7 +285,7 @@ erDiagram
 
 ---
 
-## 🔄 Alur Pengembangan per Fase
+## Alur Pengembangan per Fase
 
 ### FASE 1 — Fondasi (Auth + Schema + Admin)
 
@@ -422,7 +422,7 @@ graph TD
 - API routes: `GET/POST /orders/{id}/chat`, `GET /orders/{id}/chat/poll`
 - API routes: `GET /notifications`, `POST /notifications/read-all`, `POST /fcm-token`
 - Web routes: customer + partner chat (index, show, send, poll)
-- Navigation: 💬 Chat link untuk customer & partner
+- Navigation: Chat link untuk customer & partner
 
 ---
 
@@ -452,7 +452,7 @@ graph TD
 - `app/Http/Controllers/Customer/SosController.php` — index, send, cancel
 - `resources/views/customer/sos/index.blade.php` — SOS page dengan Alpine.js geolocation
 - `POST /api/v1/sos` — API endpoint untuk mobile SOS
-- Navigation link 🚨 SOS untuk customer
+- Navigation link SOS untuk customer
 
 ---
 
@@ -487,7 +487,7 @@ graph TD
 graph TD
     A[7.1 Rating & Review System ✅] --> B[7.2 Service History<br/>& Reports ✅]
     B --> C[7.3 Admin Dashboard<br/>Analytics & Charts ✅]
-    C --> D[7.4 Partner Premium<br/>Subscription System ✅]
+    C --> D[7.4 Partner Feature Parity<br/>& UI Polish ✅]
     D --> E[7.5 Sparepart Marketplace<br/>Basic Integration ✅]
     E --> F[7.6 B2B Insurance<br/>Partner API ✅]
     F --> G[✅ Advanced Selesai]
@@ -500,7 +500,7 @@ graph TD
 | 1 | `app/Http/Controllers/Customer/ReviewController.php` | Customer review CRUD (index, create, store) |
 | 2 | `app/Http/Controllers/Partner/ReviewController.php` | Partner review list + reply |
 | 3 | `app/Http/Controllers/Customer/HistoryController.php` | Customer service history with stats |
-| 4 | `app/Http/Controllers/Partner/SubscriptionController.php` | Partner subscription plans (basic/pro/enterprise) |
+| 4 | `app/Http/Controllers/Partner/SubscriptionController.php` | DEPRECATED — Tidak ada subscription di MontirGo |
 | 5 | `app/Http/Controllers/Partner/SparepartController.php` | Sparepart CRUD for partners |
 | 6 | `app/Http/Controllers/Admin/DashboardController.php` | Admin dashboard with AnalyticsService integration |
 | 7 | `app/Http/Controllers/Api/InsuranceController.php` | B2B Insurance API (partners, claims, webhook) |
@@ -634,7 +634,7 @@ graph TD
 
 ---
 
-## 📦 Tech Stack Final
+## Tech Stack Final
 
 ```mermaid
 graph TB
@@ -686,7 +686,7 @@ graph TB
 
 ---
 
-## ⏭️ Urutan Eksekusi Rekomendasi
+## Urutan Eksekusi Rekomendasi
 
 ```mermaid
 graph LR
@@ -725,7 +725,7 @@ graph LR
 
 ---
 
-## 🎯 Milestones
+## Milestones
 
 | Milestone | Fase | Deliverable |
 |:---|:---|:---|

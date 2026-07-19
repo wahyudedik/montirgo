@@ -30,6 +30,10 @@ class PartnerController extends Controller
             $query->where('status', $request->input('status'));
         }
 
+        if ($request->filled('workshop_category')) {
+            $query->where('workshop_category', $request->input('workshop_category'));
+        }
+
         $partners = $query->latest()->paginate(15);
 
         return view('admin.partners.index', compact('partners'));
@@ -37,7 +41,7 @@ class PartnerController extends Controller
 
     public function show(Partner $partner): View
     {
-        $partner->load(['user', 'services', 'reviews' => function ($q) {
+        $partner->load(['user', 'services', 'mechanics', 'reviews' => function ($q) {
             $q->latest()->take(5);
         }]);
 

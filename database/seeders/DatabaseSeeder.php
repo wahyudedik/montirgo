@@ -12,7 +12,6 @@ use App\Models\Order;
 use App\Models\OrderPhoto;
 use App\Models\Partner;
 use App\Models\PartnerService;
-use App\Models\PartnerSubscription;
 use App\Models\Payment;
 use App\Models\Review;
 use App\Models\ServiceCostItem;
@@ -31,6 +30,9 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // ─── Symptoms (Diagnosis Wizard) ───────────────
+        $this->call(SymptomSeeder::class);
+
         // ─── Admin ──────────────────────────────────────
         $admin = User::factory()->admin()->create([
             'name' => 'Admin MontirGo',
@@ -227,28 +229,6 @@ class DatabaseSeeder extends Seeder
             ]);
         }
 
-        // ─── Partner Subscriptions ──────────────────────
-        $plans = ['basic', 'pro', 'enterprise'];
-        $planPrices = ['basic' => 99000, 'pro' => 299000, 'enterprise' => 599000];
-        $planFeatures = [
-            'basic' => ['priority_dispatch' => false, 'promo_spot' => false, 'analytics' => false],
-            'pro' => ['priority_dispatch' => true, 'promo_spot' => false, 'analytics' => true],
-            'enterprise' => ['priority_dispatch' => true, 'promo_spot' => true, 'analytics' => true],
-        ];
-
-        foreach ($partners->take(5) as $idx => $partner) {
-            $plan = $plans[$idx % 3];
-            PartnerSubscription::create([
-                'partner_id' => $partner->id,
-                'plan' => $plan,
-                'amount' => $planPrices[$plan],
-                'status' => 'active',
-                'started_at' => now()->subDays(rand(10, 90)),
-                'expires_at' => now()->addDays(rand(30, 300)),
-                'features' => $planFeatures[$plan],
-            ]);
-        }
-
         // ─── Orders (50) — mix of statuses ──────────────
         $orders = collect();
         $statuses = ['pending', 'dispatching', 'accepted', 'on_the_way', 'arrived', 'in_progress', 'completed', 'cancelled'];
@@ -283,7 +263,7 @@ class DatabaseSeeder extends Seeder
             $status = $statuses[$statusIndex];
             $customer = $customers->random();
             $partner = $partners->random();
-            $calloutFee = fake()->randomElement([15000, 20000, 25000, 30000]);
+            $calloutFee = 30000;
             $serviceFee = in_array($status, ['completed']) ? fake()->numberBetween(50000, 500000) : 0;
             $totalAmount = $calloutFee + $serviceFee;
             $commissionRate = config('services.montirgo.additional_commission_rate', 0.10);
@@ -306,7 +286,7 @@ class DatabaseSeeder extends Seeder
                 'total_amount' => $totalAmount,
                 'platform_commission' => $platformCommission,
                 'partner_earning' => $partnerEarning,
-                'payment_method' => fake()->randomElement(['cash', 'cash', 'cash', 'qris', 'wallet']),
+                'payment_method' => fake()->randomElement(['qris', 'qris', 'ewallet', 'ewallet', 'bank_transfer']),
                 'payment_status' => $status === 'completed' ? 'paid' : ($status === 'cancelled' ? 'refunded' : 'unpaid'),
                 'is_sos' => fake()->boolean(10),
                 'created_at' => $createdAt,
@@ -339,15 +319,15 @@ class DatabaseSeeder extends Seeder
                 Payment::create([
                     'order_id' => $order->id,
                     'method' => $order->payment_method,
-                    'provider' => $order->payment_method === 'cash' ? null : 'midtrans',
-                    'transaction_id' => $order->payment_method !== 'cash' ? 'TXN-'.strtoupper(uniqid()) : null,
+                    'provider' => 'midtrans',
+                    'transaction_id' => 'TXN-'.strtoupper(uniqid()),
                     'amount' => $totalAmount,
                     'status' => 'paid',
                     'paid_at' => $orderData['paid_at'],
-                    'metadata' => $order->payment_method !== 'cash' ? [
+                    'metadata' => [
                         'payment_type' => $order->payment_method,
                         'status_code' => '200',
-                    ] : null,
+                    ],
                 ]);
             }
 

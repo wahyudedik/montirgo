@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Order;
+use App\Models\User;
 use App\Models\WalletBalance;
 use App\Models\WalletTransaction;
 use App\Models\WithdrawRequest;
@@ -13,6 +15,10 @@ use Illuminate\Support\Facades\Log;
 
 class WalletService
 {
+    public function __construct(
+        protected NotificationService $notificationService,
+    ) {}
+
     /**
      * Ambil atau buat wallet balance untuk user.
      */
@@ -55,6 +61,20 @@ class WalletService
                 'balance_after' => $balanceAfter,
                 'order_id' => $orderId,
             ]);
+
+            // Kirim notifikasi ke partner
+            $user = User::find($partnerId);
+            if ($user) {
+                try {
+                    $orderCode = Order::find($orderId)?->code ?? "#{$orderId}";
+                    $this->notificationService->notifyWalletCredit($user, $amount, $orderCode);
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send wallet credit notification', [
+                        'partner_id' => $partnerId,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
 
             return $transaction;
         });
@@ -235,6 +255,23 @@ class WalletService
                 'user_id' => $request->user_id,
                 'amount' => $request->amount,
             ]);
+
+            // Kirim notifikasi ke partner
+            $user = User::find($request->user_id);
+            if ($user) {
+                try {
+                    $this->notificationService->notifyWithdrawApproved(
+                        $user,
+                        (float) $request->amount,
+                        $request->bank_name
+                    );
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send withdraw approved notification', [
+                        'request_id' => $request->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
         });
     }
 
@@ -259,6 +296,23 @@ class WalletService
                 'amount' => $request->amount,
                 'reason' => $reason,
             ]);
+
+            // Kirim notifikasi ke partner
+            $user = User::find($request->user_id);
+            if ($user) {
+                try {
+                    $this->notificationService->notifyWithdrawRejected(
+                        $user,
+                        (float) $request->amount,
+                        $reason
+                    );
+                } catch (\Exception $e) {
+                    Log::warning('Failed to send withdraw rejected notification', [
+                        'request_id' => $request->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
         });
     }
 

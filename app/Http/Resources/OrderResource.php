@@ -34,6 +34,8 @@ class OrderResource extends JsonResource
             ],
             'payment_method' => $this->payment_method,
             'payment_status' => $this->payment_status,
+            'is_sos' => (bool) $this->is_sos,
+            'sos_type' => $this->sos_type,
             'cancelled_at' => $this->cancelled_at?->toIso8601String(),
             'cancel_reason' => $this->cancel_reason,
             'cancelled_by' => $this->cancelled_by,

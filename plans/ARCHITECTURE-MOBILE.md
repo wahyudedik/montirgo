@@ -1117,7 +1117,6 @@ mobile_montirgo/**/.env
 | 🔧 Wallet & Withdraw | Partner | Saldo + penarikan |
 | 🔧 Quick Replies | Partner | Chat template pesan |
 | 🔧 Sparepart Management | Partner | CRUD sparepart |
-| 🔧 Subscription Screen | Partner | Paket langganan |
 
 ---
 

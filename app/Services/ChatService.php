@@ -10,9 +10,14 @@ use App\Models\ChatMessage;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class ChatService
 {
+    public function __construct(
+        private readonly NotificationService $notificationService,
+    ) {}
+
     /**
      * Dapatkan atau buat chat room untuk order.
      */
@@ -52,8 +57,19 @@ class ChatService
             return $msg;
         });
 
-        // Broadcast pesan real-time
+        // Broadcast pesan real-time via WebSocket
         broadcast(new NewChatMessage($message));
+
+        // Kirim in-app + FCM notification ke penerima (kecuali pengirim)
+        $recipient = $this->getRecipient($chat, $sender);
+        if ($recipient) {
+            $preview = Str::limit($text ?? '📎 Lampiran', 100);
+            $this->notificationService->notifyNewMessage(
+                $recipient,
+                $sender->name,
+                $preview,
+            );
+        }
 
         return $message;
     }
@@ -105,6 +121,24 @@ class ChatService
             ->with(['order', 'user', 'partner.user'])
             ->orderBy('last_message_at', 'desc')
             ->get();
+    }
+
+    /**
+     * Dapatkan user penerima pesan (bukan pengirim).
+     */
+    private function getRecipient(Chat $chat, User $sender): ?User
+    {
+        // Jika pengirim adalah customer, penerima adalah partner
+        if ($sender->id === $chat->user_id && $chat->partner) {
+            return $chat->partner->user;
+        }
+
+        // Jika pengirim adalah partner, penerima adalah customer
+        if ($sender->id === $chat->partner?->user?->id) {
+            return $chat->user;
+        }
+
+        return null;
     }
 
     /**

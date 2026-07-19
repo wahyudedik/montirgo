@@ -7,12 +7,16 @@ namespace App\Services;
 use App\Jobs\DispatchTimeoutJob;
 use App\Models\Order;
 use App\Models\Partner;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use App\Models\Symptom;
 use Illuminate\Support\Facades\Log;
 
 class DispatchService
 {
+    public function __construct(
+        private readonly GeolocationService $geolocation,
+        private readonly NotificationService $notificationService,
+    ) {}
+
     /** Radius awal pencarian (km) */
     private const INITIAL_RADIUS_KM = 5;
 
@@ -39,6 +43,7 @@ class DispatchService
         Log::info("Dispatch started for order #{$order->code}", [
             'lat' => $order->location_lat,
             'lng' => $order->location_lng,
+            'vehicle_category' => $order->vehicle_category,
         ]);
 
         $this->findPartners($order);
@@ -46,6 +51,11 @@ class DispatchService
 
     /**
      * Cari partner terdekat dalam radius tertentu.
+     *
+     * Dispatch sekarang filter berdasarkan:
+     * - Kategori bengkel (motorcycle/car/both) vs kategori kendaraan order
+     * - Service radius per partner
+     * - Status partner (online)
      */
     public function findPartners(Order $order): void
     {
@@ -58,13 +68,36 @@ class DispatchService
             return;
         }
 
-        Log::info("Searching partners within {$radiusKm}km for order #{$order->code}");
+        Log::info("Searching partners within {$radiusKm}km for order #{$order->code}", [
+            'vehicle_category' => $order->vehicle_category,
+        ]);
 
-        $partners = $this->getNearbyPartners(
-            $order->location_lat,
-            $order->location_lng,
-            $radiusKm
-        );
+        // Ekstrak kategori kendaraan dari order
+        $vehicleCategory = $order->vehicle_category;
+
+        // Ekstrak kategori gejala dari selected_symptoms (jika ada)
+        $symptomCategories = null;
+        if ($order->selected_symptoms && is_array($order->selected_symptoms)) {
+            $symptomCategories = $this->extractSymptomCategories($order->selected_symptoms);
+        }
+
+        // Gunakan findMatchingPartners jika ada gejala,否则 findNearbyAvailablePartners
+        if ($symptomCategories) {
+            $partners = $this->geolocation->findMatchingPartners(
+                $order->location_lat,
+                $order->location_lng,
+                $radiusKm,
+                $vehicleCategory,
+                $symptomCategories,
+            );
+        } else {
+            $partners = $this->geolocation->findNearbyAvailablePartners(
+                $order->location_lat,
+                $order->location_lng,
+                $radiusKm,
+                $vehicleCategory,
+            );
+        }
 
         if ($partners->isEmpty()) {
             // Tidak ada partner ditemukan, eskalasi radius
@@ -79,37 +112,6 @@ class DispatchService
     }
 
     /**
-     * Cari partner terdekat menggunakan Haversine formula.
-     */
-    private function getNearbyPartners(string $lat, string $lng, float $radiusKm): Collection
-    {
-        $radiusMeters = $radiusKm * 1000;
-
-        return Partner::query()
-            ->where('status', 'approved')
-            ->where('is_online', true)
-            ->where('is_available', true)
-            ->whereNotNull('workshop_lat')
-            ->whereNotNull('workshop_lng')
-            ->select([
-                'partners.*',
-                DB::raw("(
-                    6371000 * acos(
-                        cos(radians({$lat}))
-                        * cos(radians(workshop_lat))
-                        * cos(radians(workshop_lng) - radians({$lng}))
-                        + sin(radians({$lat}))
-                        * sin(radians(workshop_lat))
-                    )
-                ) AS distance_meters"),
-            ])
-            ->having('distance_meters', '<=', $radiusMeters)
-            ->orderBy('distance_meters')
-            ->limit(10)
-            ->get();
-    }
-
-    /**
      * Kirim order ke partner tertentu.
      */
     private function sendToPartner(Order $order, Partner $partner): void
@@ -119,12 +121,24 @@ class DispatchService
         ]);
 
         // Set partner tidak available sementara
-        $partner->update(['is_available' => false]);
+        $partner->update([
+            'is_available' => false,
+            'partner_status' => 'on_the_way',
+        ]);
 
         Log::info("Order #{$order->code} sent to partner {$partner->workshop_name}", [
             'distance' => round($partner->distance_meters ?? 0),
             'partner_id' => $partner->id,
+            'workshop_category' => $partner->workshop_category,
         ]);
+
+        // Kirim push notification ke partner bahwa ada order baru
+        $distanceKm = round(($partner->distance_meters ?? 0) / 1000, 1);
+        $this->notificationService->notifyNewOrder(
+            [$partner->id],
+            $order->code,
+            $distanceKm,
+        );
 
         // Dispatch timeout job (60 detik)
         DispatchTimeoutJob::dispatch($order->id, $partner->id)
@@ -150,7 +164,10 @@ class DispatchService
     public function rejectOrder(Order $order, Partner $partner): void
     {
         // Kembalikan partner ke available
-        $partner->update(['is_available' => true]);
+        $partner->update([
+            'is_available' => true,
+            'partner_status' => 'online',
+        ]);
 
         Log::info("Order #{$order->code} rejected by {$partner->workshop_name}");
 
@@ -176,7 +193,10 @@ class DispatchService
         }
 
         // Kembalikan partner ke available
-        $partner->update(['is_available' => true]);
+        $partner->update([
+            'is_available' => true,
+            'partner_status' => 'online',
+        ]);
 
         Log::info("Partner {$partner->workshop_name} timed out for order #{$order->code}");
 
@@ -206,7 +226,10 @@ class DispatchService
     {
         // Kembalikan partner jika ada
         if ($order->partner_id) {
-            Partner::where('id', $order->partner_id)->update(['is_available' => true]);
+            Partner::where('id', $order->partner_id)->update([
+                'is_available' => true,
+                'partner_status' => 'online',
+            ]);
         }
 
         $order->update([
@@ -217,5 +240,29 @@ class DispatchService
         ]);
 
         Log::info("Order #{$order->code} cancelled by user");
+    }
+
+    /**
+     * Ekstrak kategori layanan dari array symptom IDs.
+     * Map symptom IDs ke kategori service (engine, electrical, tire, dll).
+     *
+     * @param  array<int>  $symptomIds
+     * @return array<string>|null
+     */
+    private function extractSymptomCategories(array $symptomIds): ?array
+    {
+        if (empty($symptomIds)) {
+            return null;
+        }
+
+        // Query symptoms untuk mendapatkan kategori
+        $symptoms = Symptom::whereIn('id', $symptomIds)
+            ->where('is_active', true)
+            ->pluck('category')
+            ->unique()
+            ->values()
+            ->toArray();
+
+        return empty($symptoms) ? null : $symptoms;
     }
 }

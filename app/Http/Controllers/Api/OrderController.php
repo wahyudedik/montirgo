@@ -6,6 +6,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Events\OrderStatusChanged;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\CreateOrderRequest;
+use App\Http\Requests\Api\CreateSOSRequest;
+use App\Http\Requests\Api\UpdateOrderStatusRequest;
 use App\Http\Resources\OrderResource;
 use App\Models\Order;
 use App\Services\DispatchService;
@@ -39,9 +42,7 @@ class OrderController extends Controller
      */
     public function show(Request $request, Order $order): OrderResource|JsonResponse
     {
-        if ($order->user_id !== $request->user()->id && $order->partner_id !== $request->user()->partner?->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('view', $order);
 
         $order->load(['partner', 'vehicle', 'payment', 'review']);
 
@@ -51,29 +52,44 @@ class OrderController extends Controller
     /**
      * Buat order baru (customer).
      */
-    public function store(Request $request): JsonResponse
+    public function store(CreateOrderRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'vehicle_id' => ['nullable', 'exists:vehicles,id'],
-            'service_type' => ['required', 'string', 'max:255'],
-            'problem_description' => ['nullable', 'string'],
-            'location_lat' => ['required', 'numeric'],
-            'location_lng' => ['required', 'numeric'],
-            'location_address' => ['nullable', 'string'],
-            'payment_method' => ['required', 'in:cash,wallet,qris,card'],
-        ]);
+        $validated = $request->validated();
+
+        // Check profile completion — customer needs at least 80%
+        $user = $request->user();
+        if (! $user->isProfileComplete()) {
+            return response()->json([
+                'message' => 'Silakan lengkapi profil Anda terlebih dahulu (minimal 80%)',
+                'profile_completion' => $user->getProfileCompletionPercentage(),
+            ], 422);
+        }
+
+        $paymentService = app(PaymentService::class);
+
+        // Determine vehicle_category from vehicle if not provided
+        $vehicleCategory = $validated['vehicle_category'] ?? null;
+        if (! $vehicleCategory && ! empty($validated['vehicle_id'])) {
+            $vehicle = $user->vehicles()->find($validated['vehicle_id']);
+            if ($vehicle) {
+                $vehicleCategory = $vehicle->type; // motorcycle, car, suv, truck, other
+            }
+        }
 
         /** @var Order $order */
         $order = Order::create([
-            'user_id' => $request->user()->id,
+            'user_id' => $user->id,
             'vehicle_id' => $validated['vehicle_id'] ?? null,
+            'vehicle_category' => $vehicleCategory,
             'service_type' => $validated['service_type'],
             'problem_description' => $validated['problem_description'] ?? null,
+            'selected_symptoms' => $validated['selected_symptoms'] ?? null,
             'location_lat' => $validated['location_lat'],
             'location_lng' => $validated['location_lng'],
             'location_address' => $validated['location_address'] ?? null,
             'payment_method' => $validated['payment_method'],
-            'callout_fee' => 25000,
+            'callout_fee' => $paymentService->getCalloutFee(),
+            'status' => 'pending',
         ]);
 
         // Mulai dispatch
@@ -90,9 +106,7 @@ class OrderController extends Controller
      */
     public function cancel(Request $request, Order $order): JsonResponse
     {
-        if ($order->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $this->authorize('cancel', $order);
 
         if (! in_array($order->status, ['pending', 'dispatching'])) {
             return response()->json(['message' => 'Order tidak dapat dibatalkan'], 422);
@@ -110,15 +124,9 @@ class OrderController extends Controller
     /**
      * Buat order SOS (customer) — flow disederhanakan.
      */
-    public function sosStore(Request $request): JsonResponse
+    public function sosStore(CreateSOSRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'sos_type' => ['required', 'string', 'in:flat_tire,dead_battery,out_of_fuel,locked_keys,overheat'],
-            'vehicle_id' => ['nullable', 'exists:vehicles,id'],
-            'location_lat' => ['required', 'numeric'],
-            'location_lng' => ['required', 'numeric'],
-            'location_address' => ['nullable', 'string'],
-        ]);
+        $validated = $request->validated();
 
         $sosLabel = EmergencyService::getSosLabel($validated['sos_type']);
         $sosIcon = EmergencyService::getSosIcon($validated['sos_type']);
@@ -134,7 +142,7 @@ class OrderController extends Controller
             'location_address' => $validated['location_address'] ?? null,
             'callout_fee' => 0,
             'total_amount' => 0,
-            'payment_method' => 'cash',
+            'payment_method' => 'qris',
             'status' => 'pending',
             'is_sos' => true,
             'sos_type' => $validated['sos_type'],
@@ -177,11 +185,9 @@ class OrderController extends Controller
      */
     public function accept(Request $request, Order $order): JsonResponse
     {
-        $partner = $request->user()->partner;
+        $this->authorize('accept', $order);
 
-        if (! $partner || $order->partner_id !== $partner->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $partner = $request->user()->partner;
 
         if ($order->status !== 'dispatching') {
             return response()->json(['message' => 'Order tidak dapat diterima'], 422);
@@ -200,11 +206,9 @@ class OrderController extends Controller
      */
     public function reject(Request $request, Order $order): JsonResponse
     {
-        $partner = $request->user()->partner;
+        $this->authorize('reject', $order);
 
-        if (! $partner || $order->partner_id !== $partner->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
+        $partner = $request->user()->partner;
 
         if ($order->status !== 'dispatching') {
             return response()->json(['message' => 'Order tidak dapat ditolak'], 422);
@@ -220,18 +224,11 @@ class OrderController extends Controller
     /**
      * Partner update status order.
      */
-    public function updateStatus(Request $request, Order $order): JsonResponse
+    public function updateStatus(UpdateOrderStatusRequest $request, Order $order): JsonResponse
     {
-        $partner = $request->user()->partner;
+        $this->authorize('updateStatus', $order);
 
-        if (! $partner || $order->partner_id !== $partner->id) {
-            return response()->json(['message' => 'Unauthorized'], 403);
-        }
-
-        $validated = $request->validate([
-            'status' => ['required', 'in:on_the_way,arrived,in_progress,completed'],
-            'service_fee' => ['required_if:status,completed', 'nullable', 'numeric', 'min:0'],
-        ]);
+        $validated = $request->validated();
 
         $newStatus = $validated['status'];
 
@@ -262,11 +259,16 @@ class OrderController extends Controller
             $paymentService = app(PaymentService::class);
             $paymentService->processCompletion($order, (float) $validated['service_fee']);
 
-            if ($order->payment_method === 'cash') {
-                $payment = $order->payment;
-                if ($payment) {
-                    $paymentService->confirmPayment($payment);
-                }
+            // Pembayaran diproses melalui payment gateway (Midtrans)
+            // Customer akan membayar setelah order selesai melalui Snap Token
+
+            // Auto Online: kembalikan partner ke status online setelah order selesai
+            $partner = $order->partner;
+            if ($partner && $partner->partner_status !== 'online') {
+                $partner->update([
+                    'partner_status' => 'online',
+                    'is_available' => true,
+                ]);
             }
         }
 

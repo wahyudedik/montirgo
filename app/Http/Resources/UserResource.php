@@ -18,7 +18,10 @@ class UserResource extends JsonResource
             'phone' => $this->phone,
             'avatar' => $this->avatar,
             'role' => $this->role,
+            'date_of_birth' => $this->date_of_birth?->toDateString(),
+            'address' => $this->address,
             'is_active' => $this->is_active,
+            'profile_completion' => $this->getProfileCompletionPercentage(),
             'location' => [
                 'lat' => $this->location_lat,
                 'lng' => $this->location_lng,

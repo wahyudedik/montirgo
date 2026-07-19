@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Api\WithdrawRequest;
 use App\Http\Resources\WalletResource;
 use App\Http\Resources\WalletTransactionResource;
 use App\Http\Resources\WithdrawRequestResource;
@@ -39,14 +40,9 @@ class WalletController extends Controller
     /**
      * Request withdraw.
      */
-    public function withdraw(Request $request): JsonResponse
+    public function withdraw(WithdrawRequest $request): JsonResponse
     {
-        $validated = $request->validate([
-            'amount' => ['required', 'numeric', 'min:10000', 'max:50000000'],
-            'bank_name' => ['required', 'string', 'max:100'],
-            'bank_account_number' => ['required', 'string', 'max:30'],
-            'bank_account_name' => ['required', 'string', 'max:100'],
-        ]);
+        $validated = $request->validated();
 
         try {
             $withdrawRequest = app(WalletService::class)->requestWithdraw(

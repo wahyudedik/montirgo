@@ -7,7 +7,7 @@
 
 ---
 
-## 📊 Status Proyek
+## Status Proyek
 
 | FASE | Nama | Status |
 |:---|:---|:---|
@@ -23,7 +23,7 @@
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 | Layer | Technology | Keterangan |
 |:---|:---|:---|
@@ -368,11 +368,11 @@ graph TD
 **SOS Categories:**
 | Code | Label | Icon | Description |
 |:---|:---|:---|:---|
-| `flat_tire` | Ban Kembung | 🛞 | Ban bocor atau kempes |
-| `dead_battery` | Aki Mati | 🔋 | Mesin tidak bisa menyala |
-| `out_of_fuel` | Kehabisan Bensin | ⛽ | BBM habis di jalan |
-| `locked_keys` | Kunci Tertinggal | 🔑 | Kunci tertinggal di dalam kendaraan |
-| `overheat` | Mesin Overheat | 🌡️ | Mesin terlalu panas |
+| `flat_tire` | Ban Kembung | ellipse-outline | Ban bocor atau kempes |
+| `dead_battery` | Aki Mati | battery-dead-outline | Mesin tidak bisa menyala |
+| `out_of_fuel` | Kehabisan Bensin | water-outline | BBM habis di jalan |
+| `locked_keys` | Kunci Tertinggal | key-outline | Kunci tertinggal di dalam kendaraan |
+| `overheat` | Mesin Overheat | thermometer-outline | Mesin terlalu panas |
 
 - **Priority Dispatch:** SOS order di-dispatch ke semua partner dalam radius 15km secara serentak
 - **Auto-location:** GPS lokasi otomatis terdeteksi, tidak perlu input manual
@@ -434,15 +434,15 @@ graph TD
 **Notification Types:**
 | Event | Title | Body | Deep Link |
 |:---|:---|:---|:---|
-| Order Accepted | ✅ Mekanik Ditemukan | `{partner} menerima order Anda` | Order Detail |
-| Partner On The Way | 🚗 Mekanik Berangkat | `{partner} sedang menuju lokasi Anda` | Order Detail |
-| Partner Arrived | 📍 Mekanik Tiba | `{partner} telah tiba di lokasi Anda` | Order Detail |
-| Order Completed | ✅ Order Selesai | Biaya servis: Rp {amount} | Order Detail |
-| New Chat | 💬 Pesan Baru | {sender}: {preview} | Chat Room |
+| Order Accepted | Mekanik Ditemukan | `{partner} menerima order Anda` | Order Detail |
+| Partner On The Way | Mekanik Berangkat | `{partner} sedang menuju lokasi Anda` | Order Detail |
+| Partner Arrived | Mekanik Tiba | `{partner} telah tiba di lokasi Anda` | Order Detail |
+| Order Completed | Order Selesai | Biaya servis: Rp {amount} | Order Detail |
+| New Chat | Pesan Baru | {sender}: {preview} | Chat Room |
 
 ---
 
-## ⏭️ Urutan Eksekusi
+## Urutan Eksekusi
 
 ```mermaid
 graph LR
@@ -479,7 +479,7 @@ graph LR
 
 ---
 
-## 🎯 Milestones
+## Milestones
 
 | Milestone | FASE | Deliverable |
 |:---|:---|:---|
@@ -492,7 +492,7 @@ graph LR
 
 ---
 
-## 📱 Screen Flow Summary
+## Screen Flow Summary
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -530,6 +530,6 @@ graph LR
 
 ---
 
-> **Last Updated:** 16 Juli 2026  
+> **Last Updated:** 17 Juli 2026
 > **Backend Ready:** ✅ (FASE 1-9 selesai)  
 > **API Endpoints:** 30+ (lihat [`REST-API.md`](REST-API.md))

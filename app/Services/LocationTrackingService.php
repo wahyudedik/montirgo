@@ -10,7 +10,6 @@ use App\Models\Partner;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class LocationTrackingService
@@ -201,30 +200,7 @@ class LocationTrackingService
         float $radiusKm = 10,
         int $limit = 10,
     ): Collection {
-        $radiusMeters = $radiusKm * 1000;
-
-        return Partner::query()
-            ->where('status', 'approved')
-            ->where('is_online', true)
-            ->where('is_available', true)
-            ->whereNotNull('workshop_lat')
-            ->whereNotNull('workshop_lng')
-            ->select([
-                'partners.*',
-                DB::raw("(
-                    6371000 * acos(
-                        cos(radians({$lat}))
-                        * cos(radians(workshop_lat))
-                        * cos(radians(workshop_lng) - radians({$lng}))
-                        + sin(radians({$lat}))
-                        * sin(radians(workshop_lat))
-                    )
-                ) AS distance_meters"),
-            ])
-            ->having('distance_meters', '<=', $radiusMeters)
-            ->orderBy('distance_meters')
-            ->limit($limit)
-            ->get()
+        return $this->geolocation->findNearbyAvailablePartners($lat, $lng, $radiusKm, $limit)
             ->map(function (Partner $partner) {
                 $partner->distance_km = round($partner->distance_meters / 1000, 2);
                 $partner->distance_formatted = $this->geolocation->formatDistance($partner->distance_meters / 1000);

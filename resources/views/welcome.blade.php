@@ -5,13 +5,14 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ config('app.name', 'MontirGo') }} — Mekanik Darurat Ke Lokasi Anda</title>
         <meta name="description" content="MontirGo menghubungkan pengendara dengan bengkel/mekanik terdekat secara real-time.">
+        <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
         @fonts
         @if (file_exists(public_path('build/manifest.json')) || file_exists(public_path('hot')))
             @vite(['resources/css/app.css', 'resources/js/app.js'])
         @endif
         <style>[x-cloak]{display:none!important}</style>
     </head>
-    <body class="bg-white text-dark antialiased" x-data="{ mobileMenu: false }">
+    <body class="bg-white text-dark antialiased font-sans" x-data="{ mobileMenu: false }">
 
         {{-- NAVBAR --}}
         <nav class="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-lg border-b border-gray-100">
@@ -58,7 +59,7 @@
         </nav>
 
         {{-- HERO --}}
-        <section class="relative pt-20 lg:pt-28 pb-16 lg:pb-24 overflow-hidden">
+        <section class="relative pt-20 lg:pt-28 pb-16 lg:pb-24 overflow-hidden scroll-mt-20">
             <div class="absolute inset-0 bg-gradient-to-br from-primary-50 via-white to-orange-50/50"></div>
             <div class="absolute top-20 right-0 w-[600px] h-[600px] bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
             <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-primary/5 rounded-full blur-3xl translate-y-1/3 -translate-x-1/4"></div>
@@ -126,7 +127,7 @@
         </section>
 
         {{-- LAYANAN --}}
-        <section id="layanan" class="py-16 lg:py-24 bg-gray-50/50">
+        <section id="layanan" class="py-16 lg:py-24 bg-gray-50/50 scroll-mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-12 lg:mb-16">
                     <span class="inline-block text-primary text-sm font-semibold tracking-wide uppercase mb-3">Layanan Kami</span>
@@ -167,7 +168,7 @@
         </section>
 
         {{-- CARA KERJA --}}
-        <section id="cara-kerja" class="py-16 lg:py-24">
+        <section id="cara-kerja" class="py-16 lg:py-24 scroll-mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="text-center max-w-2xl mx-auto mb-12 lg:mb-16">
                     <span class="inline-block text-primary text-sm font-semibold tracking-wide uppercase mb-3">Cara Kerja</span>
@@ -201,7 +202,7 @@
         </section>
 
         {{-- SOS --}}
-        <section id="sos" class="py-16 lg:py-24 bg-dark relative overflow-hidden">
+        <section id="sos" class="py-16 lg:py-24 bg-dark relative overflow-hidden scroll-mt-20">
             <div class="absolute inset-0 bg-gradient-to-br from-dark via-dark-600 to-dark-700/50"></div>
             <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-primary/5 rounded-full blur-3xl translate-x-1/3 -translate-y-1/3"></div>
             <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -214,10 +215,10 @@
                         <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">Tombol SOS — Bantuan Darurat Satu Klik</h2>
                         <p class="text-gray-400 leading-relaxed mb-8">Dalam situasi darurat, Anda tidak perlu mengisi form yang rumit. Cukup tekan tombol SOS, pilih kategori masalah, dan mekanik terdekat akan segera dikirim ke lokasi Anda.</p>
                         <div class="grid grid-cols-2 gap-4">
-                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">🛞</span><div><div class="text-sm font-semibold text-white">Ban Bocor</div><div class="text-xs text-white">Tambal & ganti</div></div></div>
-                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">🔋</span><div><div class="text-sm font-semibold text-white">Aki Soak</div><div class="text-xs text-white">Jumper & ganti</div></div></div>
-                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">⛽</span><div><div class="text-sm font-semibold text-white">Kehabisan Bensin</div><div class="text-xs text-white">Pengisian darurat</div></div></div>
-                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl">🌡️</span><div><div class="text-sm font-semibold text-white">Mesin Overheat</div><div class="text-xs text-white">Mogok total</div></div></div>
+                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl"><svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg></span><div><div class="text-sm font-semibold text-white">Ban Bocor</div><div class="text-xs text-white">Tambal & ganti</div></div></div>
+                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl"><svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg></span><div><div class="text-sm font-semibold text-white">Aki Soak</div><div class="text-xs text-white">Jumper & ganti</div></div></div>
+                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl"><svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg></span><div><div class="text-sm font-semibold text-white">Kehabisan Bensin</div><div class="text-xs text-white">Pengisian darurat</div></div></div>
+                            <div class="flex items-center gap-3 bg-white/5 rounded-xl p-4 border border-white/5"><span class="text-2xl"><svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg></span><div><div class="text-sm font-semibold text-white">Mesin Overheat</div><div class="text-xs text-white">Mogok total</div></div></div>
                         </div>
                     </div>
                     <div class="flex justify-center">
@@ -275,7 +276,7 @@
         </section>
 
         {{-- JADI MITRA --}}
-        <section id="mitra" class="py-16 lg:py-24 bg-primary-50/50">
+        <section id="mitra" class="py-16 lg:py-24 bg-primary-50/50 scroll-mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
                     <div class="bg-white rounded-3xl p-8 lg:p-10 shadow-xl shadow-gray-200/50 border border-gray-100">
@@ -312,7 +313,7 @@
         </section>
 
         {{-- DOWNLOAD --}}
-        <section id="download" class="py-16 lg:py-24">
+        <section id="download" class="py-16 lg:py-24 scroll-mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="relative bg-gradient-to-br from-primary via-primary-700 to-primary-600 overflow-hidden rounded-3xl">
                     <div class="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
@@ -336,7 +337,7 @@
         </section>
 
         {{-- FOOTER --}}
-        <footer class="bg-dark pt-16 pb-8">
+        <footer class="bg-dark pt-16 pb-8 scroll-mt-20">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
                     <div class="lg:col-span-1">
@@ -381,7 +382,7 @@
                 </div>
                 <div class="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p class="text-xs text-gray-500">&copy; {{ date('Y') }} MontirGo. Hak cipta dilindungi.</p>
-                    <p class="text-xs text-gray-500">Made with 🧡 di Mojokerto, Indonesia</p>
+                    <p class="text-xs text-gray-500">Made with <svg class="w-3.5 h-3.5 inline text-red-400" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg> di Mojokerto, Indonesia</p>
                 </div>
             </div>
         </footer>

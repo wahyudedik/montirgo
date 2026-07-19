@@ -30,19 +30,13 @@ class InsuranceController extends Controller
      */
     public function createClaim(Request $request, Order $order): JsonResponse
     {
+        $this->authorize('createClaim', $order);
+
         $request->validate([
             'insurance_partner_id' => 'required|exists:insurance_partners,id',
             'claimed_amount' => 'required|numeric|min:1',
             'notes' => 'nullable|string|max:1000',
         ]);
-
-        // Only the order owner or partner can create claims
-        $user = $request->user();
-        $canClaim = $order->user_id === $user->id
-            || ($user->isPartner() && $order->partner_id === $user->partner?->id)
-            || $user->isAdmin();
-
-        abort_unless($canClaim, 403);
 
         // Check if claim already exists
         abort_if(
@@ -56,7 +50,7 @@ class InsuranceController extends Controller
             'insurance_partner_id' => $request->insurance_partner_id,
             'claim_number' => 'CLM-'.strtoupper(uniqid()),
             'claimed_amount' => $request->claimed_amount,
-            'status' => 'pending',
+            'status' => 'submitted',
             'notes' => $request->notes,
         ]);
 
@@ -72,15 +66,7 @@ class InsuranceController extends Controller
      */
     public function claimStatus(Request $request, InsuranceClaim $claim): JsonResponse
     {
-        $user = $request->user();
-
-        // Only claim owner's order, partner, or admin can view
-        $order = $claim->order;
-        $canView = $order->user_id === $user->id
-            || ($user->isPartner() && $order->partner_id === $user->partner?->id)
-            || $user->isAdmin();
-
-        abort_unless($canView, 403);
+        $this->authorize('viewClaim', $claim->order);
 
         $claim->load('insurancePartner');
 

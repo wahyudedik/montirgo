@@ -46,12 +46,28 @@ return [
     | MontirGo Platform Settings
     |--------------------------------------------------------------------------
     |
-    | Platform commission rate for non-cash payments (5-10%).
+    | Platform commission rate for service fee (5-10% tiered).
     |
     */
 
     'montirgo' => [
         'additional_commission_rate' => (float) env('MONTIRGO_ADDITIONAL_COMMISSION_RATE', 0.10),
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Midtrans Payment Gateway
+    |--------------------------------------------------------------------------
+    |
+    | Konfigurasi Midtrans untuk pembayaran callout fee dan service fee.
+    | Lihat config/midtrans.php untuk konfigurasi lengkap.
+    |
+    */
+
+    'midtrans' => [
+        'client_key' => env('MIDTRANS_CLIENT_KEY'),
+        'server_key' => env('MIDTRANS_SERVER_KEY'),
+        'is_production' => (bool) env('MIDTRANS_IS_PRODUCTION', false),
     ],
 
 ];

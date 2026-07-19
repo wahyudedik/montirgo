@@ -7,7 +7,7 @@
 
 ---
 
-## 📊 Status Proyek
+## Status Proyek
 
 | FASE | Nama | Status |
 |:---|:---|:---|
@@ -23,7 +23,7 @@
 
 ---
 
-## 🏗️ Tech Stack
+## Tech Stack
 
 | Layer | Technology | Keterangan |
 |:---|:---|:---|
@@ -41,7 +41,7 @@
 
 ---
 
-## 📁 Struktur Proyek
+## Struktur Proyek
 
 ```
 montirgo-partner/
@@ -561,15 +561,14 @@ graph TD
 
 | Event | Priority | Title | Action |
 |:---|:---|:---|:---|
-| New Order | 🔴 High | 🆕 Order Baru Masuk! | Buka full-screen accept/reject |
-| Order Cancelled | 🟡 Normal | ❌ Order Dibatalkan | Update order list |
-| Customer Chat | 🟡 Normal | 💬 Pesan dari Customer | Buka chat room |
-| Withdraw Approved | 🟢 Low | ✅ Penarikan Disetujui | Update wallet |
-| Subscription Expiring | 🟢 Low | ⚠️ Langganan Habis | Buka subscription page |
+| New Order | High | Order Baru Masuk! | Buka full-screen accept/reject |
+| Order Cancelled | Normal | Order Dibatalkan | Update order list |
+| Customer Chat | Normal | Pesan dari Customer | Buka chat room |
+| Withdraw Approved | Low | Penarikan Disetujui | Update wallet |
 
 ---
 
-## ⏭️ Urutan Eksekusi
+## Urutan Eksekusi
 
 ```mermaid
 graph LR
@@ -606,7 +605,7 @@ graph LR
 
 ---
 
-## 🎯 Milestones
+## Milestones
 
 | Milestone | FASE | Deliverable |
 |:---|:---|:---|
@@ -619,7 +618,7 @@ graph LR
 
 ---
 
-## 📱 Screen Flow Summary
+## Screen Flow Summary
 
 ```
 ┌─────────────────────────────────────────────┐
@@ -683,7 +682,7 @@ graph LR
 
 ---
 
-## 🔔 Customer vs Partner — Perbandingan Fitur
+## Customer vs Partner — Perbandingan Fitur
 
 | Fitur | Customer App | Partner App |
 |:---|:---|:---|
@@ -703,6 +702,6 @@ graph LR
 
 ---
 
-> **Last Updated:** 16 Juli 2026  
+> **Last Updated:** 17 Juli 2026
 > **Backend Ready:** ✅ (FASE 1-9 selesai)  
 > **API Endpoints:** 30+ (lihat [`REST-API.md`](REST-API.md))

@@ -105,7 +105,7 @@
                                         </div>
                                         <div>
                                             <p class="text-sm font-medium text-dark">{{ $order->service_type }}</p>
-                                            <p class="text-xs text-gray-400">{{ $order->user->name }} · {{ $order->created_at->diffForHumans() }}</p>
+                                            <p class="text-xs text-gray-400">{{ $order->user->name }} &middot; {{ $order->created_at->diffForHumans() }}</p>
                                         </div>
                                     </div>
                                     <div class="text-right">

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="text-xl font-bold text-dark">⭐ Reviews</h2>
+        <h2 class="text-xl font-bold text-dark flex items-center gap-2"><svg class="w-5 h-5 text-yellow-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg> Reviews</h2>
     </x-slot>
 
     <div class="py-8">
@@ -76,14 +76,14 @@
                             {{-- Partner Reply --}}
                             @if($review->partner_reply)
                                 <div class="p-3 bg-blue-50 rounded-xl">
-                                    <p class="text-xs font-semibold text-blue-700 mb-1">💬 Balasan Anda:</p>
+                                    <p class="text-xs font-semibold text-blue-700 mb-1 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg> Balasan Anda:</p>
                                     <p class="text-sm text-blue-800">{{ $review->partner_reply }}</p>
                                 </div>
                             @else
                                 {{-- Reply Form --}}
                                 <div x-data="{ showReply: false }">
                                     <button @click="showReply = !showReply" class="text-xs text-primary hover:text-primary-600 font-medium">
-                                        💬 Balas review
+                                        <span class="flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg> Balas review</span>
                                     </button>
                                     <form x-show="showReply" x-transition method="POST" action="{{ route('partner.reviews.reply', $review) }}" class="mt-3">
                                         @csrf

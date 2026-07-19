@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Models\Partner;
+use App\Models\PartnerService;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+
 class GeolocationService
 {
     /**
@@ -147,6 +152,123 @@ class GeolocationService
             'min_lng' => round((float) $lng - $lngDegrees, 7),
             'max_lng' => round((float) $lng + $lngDegrees, 7),
         ];
+    }
+
+    /**
+     * Cari partner terdekat yang available menggunakan Haversine formula via SQL.
+     *
+     * Filter berdasarkan:
+     * - Status approved
+     * - Partner status online
+     * - is_online & is_available
+     * - Workshop category match dengan vehicle category (motorcycle/car/both)
+     * - Service radius per partner
+     * - Jam operasional (jika ada operational_schedule)
+     *
+     * @return Collection<int, Partner & object{distance_meters: float}>
+     */
+    public function findNearbyAvailablePartners(
+        string $lat,
+        string $lng,
+        float $radiusKm,
+        ?string $vehicleCategory = null,
+        int $limit = 10,
+    ): Collection {
+        $radiusMeters = $radiusKm * 1000;
+
+        $query = Partner::query()
+            ->where('status', 'approved')
+            ->where('partner_status', 'online')
+            ->where('is_online', true)
+            ->where('is_available', true)
+            ->whereNotNull('workshop_lat')
+            ->whereNotNull('workshop_lng')
+            ->where('workshop_lat', '!=', 0)
+            ->where('workshop_lng', '!=', 0);
+
+        // Filter berdasarkan kategori bengkel vs kategori kendaraan
+        if ($vehicleCategory && $vehicleCategory !== 'other') {
+            $query->where(function ($q) use ($vehicleCategory) {
+                $q->where('workshop_category', $vehicleCategory)
+                    ->orWhere('workshop_category', 'both');
+            });
+        }
+
+        $query->select([
+            'partners.*',
+            DB::raw("(
+                6371000 * acos(
+                    cos(radians({$lat}))
+                    * cos(radians(workshop_lat))
+                    * cos(radians(workshop_lng) - radians({$lng}))
+                    + sin(radians({$lat}))
+                    * sin(radians(workshop_lat))
+                )
+            ) AS distance_meters"),
+        ])
+            ->having('distance_meters', '<=', $radiusMeters)
+            ->orderBy('distance_meters')
+            ->limit($limit);
+
+        $partners = $query->get();
+
+        // Filter lagi berdasarkan service_radius per partner + jam operasional
+        return $partners->filter(function ($partner) {
+            $distanceKm = $partner->distance_meters / 1000;
+
+            return $distanceKm <= ($partner->service_radius ?? 30)
+                && $partner->isCurrentlyOperating();
+        })->values();
+    }
+
+    /**
+     * Cari partner terdekat yang punya layanan spesifik (untuk matching gejala).
+     *
+     * @return Collection<int, Partner & object{distance_meters: float}>
+     */
+    public function findMatchingPartners(
+        string $lat,
+        string $lng,
+        float $radiusKm,
+        ?string $vehicleCategory = null,
+        ?array $symptomCategories = null,
+        int $limit = 10,
+    ): Collection {
+        // Cari semua partner yang match kategori kendaraan
+        $partners = $this->findNearbyAvailablePartners(
+            $lat,
+            $lng,
+            $radiusKm,
+            $vehicleCategory,
+            50, // Ambil lebih banyak dulu untuk filtering
+        );
+
+        // Jika tidak ada symptom filter, return semua
+        if (empty($symptomCategories)) {
+            return $partners->take($limit);
+        }
+
+        // Filter partner yang punya layanan matching dengan gejala
+        $partnerIds = $partners->pluck('id');
+
+        $matchingPartnerIds = PartnerService::query()
+            ->whereIn('partner_id', $partnerIds)
+            ->where('is_active', true)
+            ->whereIn('category', $symptomCategories)
+            ->where(function ($q) use ($vehicleCategory) {
+                if ($vehicleCategory && $vehicleCategory !== 'other') {
+                    $q->where('vehicle_category', $vehicleCategory)
+                        ->orWhere('vehicle_category', 'both');
+                }
+            })
+            ->pluck('partner_id')
+            ->unique();
+
+        // Prioritaskan partner yang punya layanan matching, lalu sisanya
+        $matched = $partners->filter(fn ($p) => $matchingPartnerIds->contains($p->id))->values();
+        $unmatched = $partners->filter(fn ($p) => ! $matchingPartnerIds->contains($p->id))->values();
+
+        return $matched->concat($unmatched)->take($limit);
     }
 
     /**

@@ -75,8 +75,8 @@
                                 <div>
                                     <label class="block text-xs font-medium text-gray-600 mb-1">Tipe</label>
                                     <select x-model="item.type" :name="'items[' + index + '][type]'" class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary transition" required>
-                                        <option value="service">🔧 Jasa Servis</option>
-                                        <option value="sparepart">🔩 Sparepart</option>
+                                        <option value="service">Jasa Servis</option>
+                                        <option value="sparepart">Sparepart</option>
                                     </select>
                                 </div>
                             </div>

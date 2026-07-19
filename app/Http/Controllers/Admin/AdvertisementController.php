@@ -6,10 +6,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Advertisement;
+use App\Services\FileUploadService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 
 class AdvertisementController extends Controller
@@ -71,7 +71,8 @@ class AdvertisementController extends Controller
             'end_date' => 'required|date|after_or_equal:start_date',
         ]);
 
-        $path = $request->file('image')->store('advertisements', 'public');
+        $fileService = app(FileUploadService::class);
+        $path = $fileService->upload($request->file('image'), 'advertisements');
 
         Advertisement::create([
             'title' => $validated['title'],
@@ -107,8 +108,8 @@ class AdvertisementController extends Controller
         $data = $validated;
 
         if ($request->hasFile('image')) {
-            Storage::disk('public')->delete($advertisement->image_path);
-            $data['image_path'] = $request->file('image')->store('advertisements', 'public');
+            $fileService = app(FileUploadService::class);
+            $data['image_path'] = $fileService->replace($advertisement->image_path, $request->file('image'), 'advertisements');
         }
 
         unset($data['image']);
@@ -122,7 +123,7 @@ class AdvertisementController extends Controller
 
     public function destroy(Advertisement $advertisement): RedirectResponse
     {
-        Storage::disk('public')->delete($advertisement->image_path);
+        app(FileUploadService::class)->delete($advertisement->image_path);
         $advertisement->delete();
 
         return redirect()->route('admin.advertisements.index')

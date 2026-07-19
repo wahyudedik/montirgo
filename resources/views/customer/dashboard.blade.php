@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <div>
                 <h2 class="text-xl font-bold text-dark">
-                    Halo, {{ $user->name }} 👋
+                    Halo, {{ $user->name }}
                 </h2>
                 <p class="text-sm text-gray-500 mt-0.5">Selamat datang di MontirGo</p>
             </div>
@@ -150,7 +150,7 @@
                         <div class="space-y-2">
                             <a href="{{ route('customer.sos.index') }}" class="flex items-center gap-3 p-3 rounded-xl hover:bg-red-50 transition-colors group">
                                 <div class="w-10 h-10 bg-red-50 rounded-xl flex items-center justify-center group-hover:bg-red-100 transition-colors">
-                                    <span class="text-xl">🚨</span>
+                                    <svg class="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
                                 </div>
                                 <div>
                                     <p class="text-sm font-medium text-red-600">SOS Darurat</p>

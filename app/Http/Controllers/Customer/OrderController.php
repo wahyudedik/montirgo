@@ -9,6 +9,8 @@ use App\Models\Order;
 use App\Models\OrderPhoto;
 use App\Models\Vehicle;
 use App\Services\DispatchService;
+use App\Services\FileUploadService;
+use App\Services\PaymentService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -77,7 +79,7 @@ class OrderController extends Controller
             ],
         ];
 
-        $calloutFee = 25000;
+        $calloutFee = app(PaymentService::class)->getCalloutFee();
 
         return view('customer.orders.create', compact('vehicles', 'serviceTypes', 'calloutFee'));
     }
@@ -95,7 +97,7 @@ class OrderController extends Controller
             'location_lat' => 'required|numeric|between:-90,90',
             'location_lng' => 'required|numeric|between:-180,180',
             'location_address' => 'nullable|string|max:255',
-            'payment_method' => 'required|in:cash,wallet,qris,card',
+            'payment_method' => 'required|in:qris,ewallet,bank_transfer',
             'photos' => 'nullable|array|max:5',
             'photos.*' => 'file|mimes:jpg,jpeg,png,webp,mp4|max:5120',
         ], [
@@ -107,13 +109,14 @@ class OrderController extends Controller
             'location_lng.required' => 'Lokasi wajib diaktifkan.',
             'location_lng.numeric' => 'Format longitude tidak valid.',
             'payment_method.required' => 'Metode pembayaran wajib dipilih.',
+            'payment_method.in' => 'Metode pembayaran tidak valid. Gunakan QRIS, E-Wallet, atau Transfer Bank.',
             'photos.max' => 'Maksimal 5 foto/video.',
             'photos.*.max' => 'Ukuran file maksimal 5MB.',
             'photos.*.mimes' => 'Format file tidak didukung.',
         ]);
 
         $user = Auth::user();
-        $calloutFee = 25000;
+        $calloutFee = app(PaymentService::class)->getCalloutFee();
 
         $order = Order::create([
             'user_id' => $user->id,
@@ -131,8 +134,10 @@ class OrderController extends Controller
 
         // Handle photo/video uploads
         if ($request->hasFile('photos')) {
+            $fileService = app(FileUploadService::class);
+
             foreach ($request->file('photos') as $file) {
-                $path = $file->store('order-photos', 'public');
+                $path = $fileService->upload($file, 'order-photos');
                 $type = str_starts_with($file->getMimeType(), 'video/') ? 'video' : 'photo';
 
                 OrderPhoto::create([

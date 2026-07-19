@@ -93,13 +93,13 @@
             {{-- Order Map --}}
             @if(in_array($order->status, ['dispatching', 'accepted', 'on_the_way', 'arrived', 'in_progress']))
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-sm font-bold text-dark mb-3">📍 Lokasi</h3>
+                    <h3 class="text-sm font-bold text-dark mb-3 flex items-center gap-1"><svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg> Lokasi</h3>
                     @php
                         $mapMarkers = [
-                            ['lat' => (float) $order->location_lat, 'lng' => (float) $order->location_lng, 'label' => '📍 Lokasi Anda', 'color' => '#3B82F6'],
+                            ['lat' => (float) $order->location_lat, 'lng' => (float) $order->location_lng, 'label' => 'Lokasi Anda', 'color' => '#3B82F6'],
                         ];
                         if ($order->partner && $order->partner->workshop_lat && $order->partner->workshop_lng) {
-                            $mapMarkers[] = ['lat' => (float) $order->partner->workshop_lat, 'lng' => (float) $order->partner->workshop_lng, 'label' => '🔧 ' . $order->partner->workshop_name, 'color' => '#10B981'];
+                            $mapMarkers[] = ['lat' => (float) $order->partner->workshop_lat, 'lng' => (float) $order->partner->workshop_lng, 'label' => $order->partner->workshop_name, 'color' => '#10B981'];
                         }
                     @endphp
                     <x-map

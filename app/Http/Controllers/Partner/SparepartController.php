@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Partner;
 
 use App\Http\Controllers\Controller;
 use App\Models\Sparepart;
+use App\Services\FileUploadService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -52,7 +53,7 @@ class SparepartController extends Controller
 
         $photoUrl = null;
         if ($request->hasFile('photo')) {
-            $photoUrl = $request->file('photo')->store('spareparts', 'public');
+            $photoUrl = app(FileUploadService::class)->upload($request->file('photo'), 'spareparts');
         }
 
         Sparepart::create([
@@ -100,7 +101,7 @@ class SparepartController extends Controller
 
         $photoUrl = $sparepart->photo_url;
         if ($request->hasFile('photo')) {
-            $photoUrl = $request->file('photo')->store('spareparts', 'public');
+            $photoUrl = app(FileUploadService::class)->upload($request->file('photo'), 'spareparts');
         }
 
         $sparepart->update([
